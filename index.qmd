@@ -6,9 +6,9 @@ title: "My website and data analysis portfolio"
 
 # Hello
 
-### And hello again
+### friends 
 
-Welcome to **my website** and _data analysis portfolio._ 
+Welcome to **Doreen K. Kalembe's website ** and _data analysis portfolio._ 
 
 
 * Please use the `Menu Bar` above to look around.

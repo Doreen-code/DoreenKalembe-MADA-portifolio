@@ -2,6 +2,29 @@
 title: "About me"
 ---
 
-Add some text and a figure describing myself.
+![My Picture](./Users/kkdor/Desktop/Photos/WhatsApp Image 2024-04-29 at 18.51.04_261d7a9a.jpg)
+# Introduction
+Here is what you can know about me. 
+I identify so much as a teacher and knowledge seeker. I am a mum of two beautiful daughters and a handsome energetic son. 
 
-For details, see the exercise instructions. 
+In my free time, I enjoy listening to podcasts, sermons and music. I enjou cooking and trying foods but I have not liked the pumpkin pie any bit plus the sweet meats(Guess I am weird.)
+
+## Education Background
+
+I did education with physics and mathematics for my undergraduate studies. I taught high school students for three years before enrolling for my masters degree. 
+
+I did alot of Biomathematics and a touch of computer science during my masters. This brings me to a point where I talk about the few softwares or programming languages that i know.
+
+##Skills and programming
+
+During my masters degree at the African Institute for Mathematical sciences, I learnt how to use python, abit of statistical regression with R, and due to curiosity, I taught myself abit of java.
+
+For my PhD, I have so far learnt more about R during my first semester and I can not wait to use more of it in this course.
+
+## My Interests.
+My primary interests are in modelling of infecious diseases. We are working on TB in uganda. 
+Not only do am I interested in infecious diseases but also Data Science, AI, Machine learning, maternal and child health, Sexual and reproductive health and finally health policy(Partly because i feel like the policies that area allowed ares sometimes not the best one for a particular problem :))
+
+
+
+

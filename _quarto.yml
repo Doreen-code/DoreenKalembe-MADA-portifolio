@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "YOURNAME Data Analysis Portfolio"
+  title: "Doreen Kalembe Data Analysis Portfolio"
   navbar:
     left:
       - text: "About Me"
@@ -16,7 +16,7 @@ website:
             file: coding-exercise/coding-exercise.qmd
     right:
       - icon: github 
-        href: URL-TO-THIS-REPOSITORY-HERE        
+        href: https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio     
 format:
   html:
     theme: cosmo

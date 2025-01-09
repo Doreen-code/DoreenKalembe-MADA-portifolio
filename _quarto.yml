@@ -19,7 +19,7 @@ website:
         href: https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio     
 format:
   html:
-    theme: cosmo
+    theme: lumen  
     highlight: zenburn
     css: styles.css
     toc: FALSE

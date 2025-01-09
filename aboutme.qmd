@@ -2,12 +2,15 @@
 title: "About me"
 ---
 
-![My Picture](./Users/kkdor/Desktop/Photos/WhatsApp Image 2024-04-29 at 18.51.04_261d7a9a.jpg)
 # Introduction
-Here is what you can know about me. 
-I identify so much as a teacher and knowledge seeker. I am a mum of two beautiful daughters and a handsome energetic son. 
 
-In my free time, I enjoy listening to podcasts, sermons and music. I enjou cooking and trying foods but I have not liked the pumpkin pie any bit plus the sweet meats(Guess I am weird.)
+Here is what you can know about me. 
+I identify so much as a teacher and knowledge seeker. I am a mum of two beautiful daughters and a handsome energetic son(Yes! three babies and I need two more). 
+
+In my free time, I enjoy listening to podcasts, sermons and music. I enjoy cooking and trying foods but I have not liked the pumpkin pie any bit plus the sweet meats(Guess I am weird.)
+
+![This is me](images/my_pic.jpg)
+
 
 ## Education Background
 
@@ -22,9 +25,9 @@ During my masters degree at the African Institute for Mathematical sciences, I l
 For my PhD, I have so far learnt more about R during my first semester and I can not wait to use more of it in this course.
 
 ## My Interests.
-My primary interests are in modelling of infecious diseases. We are working on TB in uganda. 
-Not only do am I interested in infecious diseases but also Data Science, AI, Machine learning, maternal and child health, Sexual and reproductive health and finally health policy(Partly because i feel like the policies that area allowed ares sometimes not the best one for a particular problem :))
+My primary interests are in modelling of infectious diseases. We are working on TB in Uganda. 
+Not only am I interested in infectious diseases but also Data Science, AI, Machine learning, maternal and child health, Sexual and reproductive health and finally health policy(Partly because I feel like the policies that are passed are sometimes not the best one for a particular health problem :)).
 
-
+I was reading [this](https://builtin.com/artificial-intelligence/artificial-intelligence-future) and I was astonished about the future. As other women are worried about their youthful appearance, I am excited of what the future holds and what my children will know in the next 20 years. 
 
 

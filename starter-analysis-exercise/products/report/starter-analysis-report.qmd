@@ -40,7 +40,7 @@ _Provide enough background on your topic that others can understand the why and 
 
 ## Description of data and data source
 _Describe what the data is, what it contains, where it is from, etc. Eventually this might be part of a methods section._
-
+The data contains 15 observations and five variables. I added two more variables that is ear color which is a character variable and waist size which is a numeric variable showing the waist size of each individual plus their individual eye color.
 ## Questions/Hypotheses to be addressed
 _State the research questions you plan to answer with this analysis._
 

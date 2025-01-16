@@ -1,7 +1,9 @@
 ---
+Prasanga Paudel contributed to this exercise
+
 title: "Manuscript/Report Template for a Data Analysis Project"
 subtitle: ""
-author: Your Name
+author: Doreen Kibuule Kalembe
 date: today
 format:
   html:
@@ -143,6 +145,55 @@ This paper [@leek2015] discusses types of analyses.
 These papers [@mckay2020; @mckay2020a] are good examples of papers published using a fully reproducible setup similar to the one shown in this template. 
 
 Note that this cited reference will show up at the end of the document, the reference formatting is determined by the CSL file specified in the YAML header. Many more style files for almost any journal [are available](https://www.zotero.org/styles). You also specify the location of your bibtex reference file in the YAML. You can call your reference file anything you like, I just used the generic word `references.bib` but giving it a more descriptive name is probably better.
+
+code for the two figures.
+Comparing how Height varies with weight 
+```{r}
+figure1 <- ggplot(mydata, aes(x = Weight, y = Height)) +
+  geom_point() +
+   geom_smooth(method = "lm", color = "red", se = TRUE)+
+  labs(title = "Relationship between Weight and Height")
+figure1
+```
+
+Figure for the second figure.
+
+comparing the height with respect to the gender of an individual. 
+```{r}
+figure2 <- ggplot(mydata, aes(x = Gender, y = Height, fill = Gender)) +
+  geom_boxplot()+
+  labs(title = "Relationship between Gender and Height")
+figure2
+
+```
+
+
+table of the combined comparison. 
+
+```{r}
+# fit linear model using height as outcome, weight and gender as predictor
+
+lmfit2 <- lm(Height ~ Weight + Gender, mydata)  
+
+# place results from fit into a data frame with the tidy function
+lmtable2 <- broom::tidy(lmfit2)
+
+#look at fit results
+print(lmtable2)
+```
+The average height for the reference group (females) when Weight = 0 is 149.3 cm.
+
+Weight:
+ For each 1-unit increase in weight, height increases by 0.262cm, keeping gender constant. However this was not statitically significant with P-value (0.4887). This suggests that weight does not have a significant linear relationship with height.
+ 
+GenderM (Male):
+Males are, on average, 2.124 cm shorter than the reference group (females) when weight is held constant. However this was not statistically significant with 
+P-value = 0.8967 > 0.05), suggesting no significant height difference between males and females.
+
+
+GenderO (Other):
+Individuals in the "Other" gender category are, on average, 4.764 cm shorter than females when weight is held constant. However this was not statistically significant with P-value = 0.812 > 0.05, suggesting no significant height difference between "Other" and females.
+
 
 
 {{< pagebreak >}}

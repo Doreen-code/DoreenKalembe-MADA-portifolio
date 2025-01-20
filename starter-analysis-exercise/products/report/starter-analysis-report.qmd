@@ -1,9 +1,8 @@
 ---
-Prasanga Paudel contributed to this exercise
-
 title: "Manuscript/Report Template for a Data Analysis Project"
 subtitle: ""
-author: Doreen Kibuule Kalembe
+author: "Doreen Kibuule Kalembe"
+
 date: today
 format:
   html:
@@ -13,6 +12,7 @@ format:
 bibliography: ../dataanalysis-template-references.bib
 csl: ../apa.csl
 ---
+Prasanga Paudel contributed to this exercise
 
 The structure below is one possible setup for a data analysis project (including the course project). For a manuscript, adjust as needed. 
 You don't need to have exactly these sections, but the content covering those sections should be addressed.
@@ -21,9 +21,11 @@ This uses MS Word as output format. [See here](https://quarto.org/docs/output-fo
 
 
 ```{r, echo=FALSE, message=FALSE}
-# load a few R packages
+
+# Load packages
 library(here)
 library(knitr)
+
 ```
 
 

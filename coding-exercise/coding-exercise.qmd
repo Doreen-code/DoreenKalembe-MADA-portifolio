@@ -2,4 +2,176 @@
 title: "R Coding Exercise"
 ---
 
-Placeholder file for the future R coding exercise.
+#Placeholder file for the future R coding exercise.
+
+#we are installing these packages and loading the different libraries that are 
+#required for the different sets of code to run in R.
+```{r}
+install.packages("dslabs")
+#loads the dslabs package
+library(dslabs)
+library(tidyverse)
+library(dplyr)
+```
+```{r}
+#look at help file for gapminder data
+help("gapminder")
+
+data("gapminder") 
+#we are loading the data to make it ready for use.
+
+str(gapminder) 
+#this function is helping us know the number of rows(observations) and number of #variables in the data set. There are 10545 rows and 9 columns.
+
+summary(gapminder)
+#the summary function helps us know the summary statistic of each variable in the
+#data set.
+
+class(gapminder)
+# Use the class() function to check the type of the gapminder object. its class 
+#is a data frame.
+```
+
+code that assigns afrian countries.
+```{r}
+africadata<-gapminder%>%
+filter(continent== "Africa")
+africadata
+#this code gets filter for countries that only belong to the African continent.
+```
+
+Data for life expectancy and infant mortality.
+```{r}
+exp_mortal_data<- africadata%>%
+select(infant_mortality,life_expectancy)
+exp_mortal_data
+#this code gets into the African data and selects only the two colums we need.
+```
+
+Data for life expectancy and population.
+```{r}
+popn_expct_data<- africadata%>%
+select(population,life_expectancy)
+ #this code gets into the African data and selects only the two colums we need.
+```
+
+```{r}
+#get an overview of the data structure for life expectancy and infant mortality.
+str(exp_mortal_data)
+
+#summary of the data structure.
+summary(exp_mortal_data)
+
+#get an overview of the data structure for population and life expectancy.
+str(popn_expct_data)
+
+#summary of the data structure.
+summary(popn_expct_data)
+```
+Plot life expectancy as a function of infant mortality. 
+
+```{r}
+library(ggplot2)
+ggplot(data= exp_mortal_data, aes(x=infant_mortality, y= life_expectancy))+
+  geom_point(color="blue", alpha=0.7)+
+   labs(
+    title = "Life Expectancy vs. Infant Mortality",
+    x = "Infant Mortality (per 1,000 births)",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_bw()
+  
+```
+Second plot of life expectacy vs population size. 
+
+
+```{r}
+ggplot(data = popn_expct_data, aes(x = population, y = life_expectancy)) +
+  geom_point(color = "red", alpha = 0.6) +
+  scale_x_log10() +  # Set x-axis to a logarithmic scale
+  labs(
+    title = "Life Expectancy vs. Population Size (Log Scale)",
+    x = "Population (log scale)",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_minimal()  #
+
+```
+From the second plot, we notice that there are streaks in the data because countries with similar population sizes often share similar demographic characteristics or reporting practices.We notice that most countries with populations clustered around the same thresholds(e.g 5million, 10 million, 50 million...) display similar life expectancy values, creating visual streaks.
+
+lets figure out some missing data.
+```{r}
+sum(is.na(africadata$infant_mortality))
+#these are the missing values for infant mortality in the africadata set.
+
+```
+
+years with missing data.
+```{r}
+library(naniar)
+missing_infant_motality<-africadata%>%
+  filter(is.na(infant_mortality))
+
+missing_years<- unique(missing_infant_motality$year)
+missing_years
+
+```
+```{r}
+valid_data<- africadata%>%
+ filter(year==2000)
+```
+The code above only filters for rows in the data sets where the year is 2000 and leaves
+out everything else.
+```{r}
+str(valid_data)
+summary(valid_data)
+```
+Lets make these plots again but this time around with the data that contains the year 2000.
+```{r}
+ggplot(data= valid_data, aes(x=infant_mortality, y= life_expectancy))+
+  geom_point(color="blue", alpha=0.7)+
+   labs(
+    title = "Life Expectancy vs. Infant Mortality",
+    x = "Infant Mortality (per 1,000 births)",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_bw()
+```
+From the above plot, we see that there is a negative correlation between life expectancy aand infant mortality.
+
+
+Lets take a look at a Second plot. This contains data for the year 2000 but still we are considering life expentancy and population size.
+```{r}
+ggplot(data = valid_data, aes(x = population, y = life_expectancy)) +
+  geom_point(color = "green", alpha = 0.6) +
+  scale_x_log10() +  # Set x-axis to a logarithmic scale
+  labs(
+    title = "Life Expectancy vs. Population Size (Log Scale)",
+    x = "Population (log scale)",
+    y = "Life Expectancy (years)"
+  ) +
+  theme_minimal()  #
+```
+From the above, we dont see any correlation between the two variables.
+
+lets apply some linear regression to the data and see what comes out.
+```{r}
+fit1<-lm(valid_data$life_expectancy ~valid_data$infant_mortality)
+#applying linear regression model to the two variables.
+
+fit2<-lm(valid_data$life_expectancy~valid_data$population)
+
+summary(fit1)
+summary(fit2)
+```
+
+\textbf{Explanation of results. }
+
+From the first fit1 the summary of results shows that there is a negative relationship between life expectancy and infant mortality. for every unit increase in infant mortality, life expectancy decreases by 0.189 years and this is statistically significant with p-value<0.001.
+
+
+From the summary results of the second fit, it shows that When the population is 0 (hypothetical case), the predicted life expectancy is approximately 55.93 years.
+
+There is a positive relationship between life expectancy and population size. For every unit increase in population size, the life expectancy increase by 0.00000002756 years(This is not meaningful). However, this was not statitically significant with p-values=0.616 >0.05.
+
+This suggests almost no meaningful relationship between between population size and life expectancy in our data.

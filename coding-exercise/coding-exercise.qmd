@@ -7,7 +7,7 @@ title: "R Coding Exercise"
 #we are installing these packages and loading the different libraries that are 
 #required for the different sets of code to run in R.
 ```{r}
-install.packages("dslabs")
+#install.packages("dslabs")
 #loads the dslabs package
 library(dslabs)
 library(tidyverse)

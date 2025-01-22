@@ -25,6 +25,7 @@ This uses MS Word as output format. [See here](https://quarto.org/docs/output-fo
 # Load packages
 library(here)
 library(knitr)
+library(ggplot2)
 
 ```
 
@@ -151,11 +152,16 @@ Note that this cited reference will show up at the end of the document, the refe
 code for the two figures.
 Comparing how Height varies with weight 
 ```{r}
+#path to data
+#note the use of the here() package and not absolute paths
+data_location <- here::here("starter-analysis-exercise","data","processed-data","processeddata.rds")
+
+#load data. 
+mydata <- readRDS(data_location)
 figure1 <- ggplot(mydata, aes(x = Weight, y = Height)) +
   geom_point() +
-   geom_smooth(method = "lm", color = "red", se = TRUE)+
+  geom_smooth(method = "lm", color = "blue", se = TRUE)+
   labs(title = "Relationship between Weight and Height")
-figure1
 ```
 
 Figure for the second figure.
@@ -165,8 +171,6 @@ comparing the height with respect to the gender of an individual.
 figure2 <- ggplot(mydata, aes(x = Gender, y = Height, fill = Gender)) +
   geom_boxplot()+
   labs(title = "Relationship between Gender and Height")
-figure2
-
 ```
 
 

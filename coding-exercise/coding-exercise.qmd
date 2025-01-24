@@ -8,11 +8,16 @@ title: "R Coding Exercise"
 #required for the different sets of code to run in R.
 ```{r}
 #install.packages("dslabs")
+#install.packages("naniar")
 #loads the dslabs package
 library(dslabs)
 library(tidyverse)
 library(dplyr)
+library(naniar)
 ```
+
+$\textbf{This section contributed to by ANNALISE CRAMER, after Doreen's analysis}$
+
 ```{r}
 #look at help file for gapminder data
 help("gapminder")
@@ -36,7 +41,7 @@ code that assigns afrian countries.
 ```{r}
 africadata<-gapminder%>%
 filter(continent== "Africa")
-africadata
+#africadata
 #this code gets filter for countries that only belong to the African continent.
 ```
 
@@ -44,7 +49,7 @@ Data for life expectancy and infant mortality.
 ```{r}
 exp_mortal_data<- africadata%>%
 select(infant_mortality,life_expectancy)
-exp_mortal_data
+#exp_mortal_data
 #this code gets into the African data and selects only the two colums we need.
 ```
 
@@ -175,3 +180,89 @@ From the summary results of the second fit, it shows that When the population is
 There is a positive relationship between life expectancy and population size. For every unit increase in population size, the life expectancy increase by 0.00000002756 years(This is not meaningful). However, this was not statitically significant with p-values=0.616 >0.05.
 
 This suggests almost no meaningful relationship between between population size and life expectancy in our data.
+
+
+$\textbf{The following section is Annalise Cramer's analysis}$
+
+First, let us load the dataset. There's several difference infectious diseases, states, years 1928-2011, weeks, and counts of cases.
+```{r}
+data("us_contagious_diseases") 
+str(us_contagious_diseases)
+summary(us_contagious_diseases)
+```
+
+I want to only look at Pertussis (whooping cough), then I will identify the states which seem the most severe to see if I can identify a region. 
+```{r}
+unique(us_contagious_diseases$disease)
+pertussis <- us_contagious_diseases %>%
+  filter(disease=="Pertussis")
+```
+
+Let's make a few exploratory plots. 
+a.) Disease counts, year by year, colored by state.
+```{r}
+ggplot(data=pertussis, aes(x=year, y=count, col=state)) +
+  geom_point()
+```
+
+The data looks a little crazy with missing values, so let me check mumps and polio.
+```{r}
+unique(us_contagious_diseases$disease)
+
+mumps <- us_contagious_diseases %>%
+  filter(disease=="Mumps")
+
+polio <- us_contagious_diseases %>%
+  filter(disease=="Polio")
+
+ggplot(data=mumps, aes(x=year, y=count, col=state)) +
+  geom_point()
+
+ggplot(data=polio, aes(x=year, y=count, col=state)) +
+  geom_point()
+```
+
+Okay, looks like polio and mumps are okay, and the pertussis data is weird. Let's continue forward with polio. I'll create a new variable, Region, using CDC's geographic divisions. I used AI to write this, since I didn't want to type out every state's name.
+```{r}
+region_data <- polio %>%
+  mutate(
+    region = case_when(
+      state %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont") ~ "New England",
+      state %in% c("New Jersey", "New York", "Pennsylvania") ~ "Middle Atlantic",
+      state %in% c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin") ~ "East North Central",
+      state %in% c("Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota", "South Dakota") ~ "West North Central",
+      state %in% c("Delaware", "District of Columbia", "Florida", "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "West Virginia") ~ "South Atlantic",
+      state %in% c("Alabama", "Kentucky", "Mississippi", "Tennessee") ~ "East South Central",
+      state %in% c("Arkansas", "Louisiana", "Oklahoma", "Texas") ~ "West South Central",
+      state %in% c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming") ~ "Mountain",
+      state %in% c("Alaska", "California", "Hawaii", "Oregon", "Washington") ~ "Pacific",
+      TRUE ~ "Other" # Catch-all for states not listed
+    )
+  )
+```
+
+Okay, I'll make the same plot as earlier, but I'll color by region.
+```{r}
+ggplot(data=region_data, aes(x=year, y=count, col=region)) +
+  geom_point()
+
+ggplot(data=region_data, aes(x=year, y=count, col=region)) +
+  geom_smooth()
+```
+
+Next, I will make 2 models. The first will look at state as a predictor, the second will look at region as a predictor.
+
+```{r}
+model1 <- lm(data=region_data, count~state)
+model2 <- lm(data=region_data, count~region)
+
+summary(model1)
+summary(model2)
+```
+
+We will assume null hypotheses that neither set of predictors is associated with case count, and we'll use an alpha=0.05 significance level. Model 1 shows that some states were significant predictors of pilio case counts, California, Illinois, Massachusetts, Michigan, Minnesota, New York, Ohio, Pensylvania, Texas, and Wisconsin. Model 2 found all regions to be significantly asosociated with polio case counts.
+
+
+
+
+

@@ -15,7 +15,9 @@ website:
           - text: "R Coding Exercise"
             file: coding-exercise/coding-exercise.qmd
           - text: "data_exercise"
-            file: data_exercide/data-exercise.qmd
+            file: data_exercise/data-exercise.qmd
+          - text: "Data Analysis Exercise"
+            file: cdcdata-exercise/cdcdata-exercise.qmd
     right:
       - icon: github 
         href: https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio     

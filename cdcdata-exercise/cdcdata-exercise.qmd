@@ -1,0 +1,127 @@
+We shall start by loading a few packages that we think we might need for this data.
+
+```{r, echo=FALSE, message=FALSE}
+
+# Load packages
+library(here)
+library(knitr)
+library(ggplot2)
+library(readr)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(haven)
+library(Hmisc)
+library(naniar)
+
+```
+The data used for this annalysis was the Framing heart study and the dataset was gotten from https://www.framinghamheartstudy.org/ .
+
+We shall start by loading the data set and the exploring it to see what it contains. 
+```{r}
+data<- read_sas("data/fham1.sas7bdat")
+```
+lets go through the data set and see what it entails.
+```{r}
+dim(data) 
+```
+The data set contains 4434 observations and 38 variables. For the purpose of this class,  we will reduce the data set to have just a few variables that we shall need for this annalysis .
+```{r}
+diab_data<- data%>%
+  select(SEX, AGE, BMI, TOTCHOL, SYSBP, DIABETES,GLUCOSE)
+```
+lets check whether our data set has some missing values 
+```{r}
+pct_complete(diab_data)
+gg_miss_var(diab_data)
+```
+our output shows that we have missing values for BMI, Total cholestral and glucose. In order to have a clean annalysis, we decided to drop the missing values. Our cut off for dropping the values was that if the values are less that  10%, then we can drop them. 
+```{r}
+sum(is.na(diab_data$BMI))
+sum(is.na(diab_data$TOTCHOL))
+sum(is.na(diab_data$GLUCOSE))
+diab_data<-diab_data%>%     #this will help us drop the na values in the data set.
+  drop_na()
+```
+```{r}
+sum(is.na(diab_data)) #checking to see if all the missing values have been dropped.
+```
+we went ahead to categorise some other variables. 
+```{r}
+#we categorised age to see which age is at greater risk of diabetes.
+diab_data <- diab_data %>%
+   mutate(age_cat= case_when(AGE >= 0 & AGE <= 40~ 0,
+                             AGE > 40 & AGE <= 50~ 1,
+                             AGE > 50 & AGE <= 60~ 2,
+                             AGE > 60 ~3, 
+                             TRUE~NA,
+  ))
+
+# BMI and total cholesterol we will also use to create categories because these will give us clinically relevant ranges.
+diab_data <- diab_data %>%
+   mutate(collestral_cat= case_when(
+    TOTCHOL < 200 ~ "Normal",
+    TOTCHOL >= 200 & TOTCHOL< 240 ~ "Boardline",
+    TOTCHOL>= 240 ~ "High",
+  ))
+  
+diab_data<- diab_data %>%
+  mutate(bmi_cat = case_when(
+    BMI < 18.5 ~ "Underweight",
+    BMI >= 18.5 & BMI < 25 ~ "Healthyweight",
+    BMI >= 25 & BMI < 30 ~ "Overweight",
+    BMI>= 30 ~ "Obese",
+  ))
+```
+
+Lets make some summary statitics of the data.
+```{r}
+# Summary statistics for numerical and categorical variables
+summary(diab_data)
+```
+Checking out the descriptive summary statistics 
+```{r}
+#checking the distribution statistics of the variables in the data set 
+
+describe(diab_data, stats = c("mean", "sd", "min", "max", "median", "iqr"))
+table(diab_data$SEX)
+prop.table(table(diab_data$SEX))
+prop.table(table(diab_data$DIABETES))
+```
+ This description shows us how many individuals belong to each category. There are 1817 males and 2196 females. Out of the 4434 individuals, 45.3% are male and 54.7% are female. The distributions and percentage proportions of the variables are shown in the table.
+ 
+
+Lets make some visualisations for the data that we have and also explore some 
+some relationships between some variables
+```{r}
+ggplot(diab_data, aes(x = GLUCOSE, y = BMI, color = as.factor(DIABETES))) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Scatter plot of Glucose vs BMI", x = "Glucose", y = "BMI") +
+  theme_minimal()
+```
+
+Relationships.
+```{r}
+ggplot(diab_data, aes(x = as.factor(DIABETES), y = GLUCOSE, fill = as.factor(SEX))) +
+  geom_boxplot() +
+  labs(title = "Glucose Levels by Diabetes Outcome", x = "Diabetes (0 = No, 1 = Yes)", y = "Glucose")
+```
+We can also visualize the distributions of continuous variables.
+
+```{r}
+# Histogram of total cholestral
+ggplot(diab_data, aes(x = TOTCHOL)) + 
+  geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "chloestral level Distribution", x = "Cholestral levels", y = "Count")
+# Histogram of systolic blood pressure
+ggplot(diab_data, aes(x = SYSBP)) + 
+  geom_histogram(binwidth = 5, fill = "yellow", color = "black", alpha = 0.7) +
+  labs(title = "systolic blood pressure distribution", x = "sysBP", y = "Count")
+
+# Density plot for BMI
+ggplot(diab_data, aes(x = BMI)) +
+  geom_density(fill = "red", alpha = 0.5) +
+  labs(title = "BMI Density Plot", x = "BMI", y = "Density")
+
+```
+From the above curves, we see that BMI, total cholestral and systolic blood pressure are normally distributed. 

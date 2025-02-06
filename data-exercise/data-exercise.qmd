@@ -1,0 +1,198 @@
+---
+title: "An example creating a synthetic dataset"
+author: "Doreen"
+date: "2025-01-29"
+output: html_document
+---
+
+
+# Processing script
+
+This Quarto file contains a mix of code and explanatory text to illustrate a how i created my synthetic dataset.
+
+These are the packages that we might need for our data set to be created.
+```{r}
+library(dplyr) #for data processing/cleaning
+library(tidyr) #for data processing/cleaning
+library(skimr) #for nice visualization of data 
+library(here) #to set paths
+library(dplyr)
+library(ggplot2)
+```
+
+
+```{r}
+# Set seed for reproducibility
+set.seed(123)
+
+# Define number of patients
+n_patients <- 100
+
+```
+
+This code will help us generate our data set.
+```{r}
+# Create empty dataframe
+cardiac_data <- data.frame(
+  patient_id = numeric(n_patients),
+  age_group = character(n_patients),
+  sex = character(n_patients),
+  bmi_category = character(n_patients),
+  cholesterol = numeric(n_patients),
+  diabetes = numeric(n_patients),
+  smoking = numeric(n_patients),
+  hypertension = numeric(n_patients),
+  mi = numeric(n_patients)
+)
+```
+
+Fill in variables and try to do the different categories just to see how it comes out.
+```{r}
+
+# Patient ID
+cardiac_data$patient_id <- 1:n_patients
+
+# Age groups (categorical)
+cardiac_data$age_group <- sample(
+  c("30-40", "40-50", "50-60", "60-70"),
+  n_patients,
+  replace = TRUE,
+  prob = c(0.2, 0.3, 0.3, 0.2)  # Higher probability for middle age groups
+)
+
+# Sex
+cardiac_data$sex <- sample(
+  c("Male", "Female"),
+  n_patients,
+  replace = TRUE
+)
+
+# BMI categories
+cardiac_data$bmi_category <- sample(
+  c("Normal", "Overweight", "Obese"),
+  n_patients,
+  replace = TRUE,
+  prob = c(0.3, 0.4, 0.3)
+)
+
+# Cholesterol (normally distributed)
+cardiac_data$cholesterol <- round(rnorm(n_patients, mean = 210, sd = 30))
+
+# Diabetes (more likely with obesity and higher age) since we wanted to make
+#some variables to be associated with others. 
+cardiac_data$diabetes <- ifelse(
+  cardiac_data$bmi_category == "Obese" | cardiac_data$age_group %in% c("50-60", "60-70"),
+  rbinom(n_patients, 1, 0.3),  # Higher probability
+  rbinom(n_patients, 1, 0.1)   # Lower probability
+)
+
+# Smoking (less likely in older age groups)
+cardiac_data$smoking <- ifelse(
+  cardiac_data$age_group %in% c("30-40", "40-50"),
+  rbinom(n_patients, 1, 0.3),  # Higher probability
+  rbinom(n_patients, 1, 0.1)   # Lower probability
+)
+
+# Hypertension (influenced by age, BMI, and diabetes)
+cardiac_data$hypertension <- ifelse(
+  cardiac_data$age_group %in% c("50-60", "60-70") |
+    cardiac_data$bmi_category == "Obese" |
+    cardiac_data$diabetes == 1,
+  rbinom(n_patients, 1, 0.6),  # Higher probability
+  rbinom(n_patients, 1, 0.2) )  # Lower probability
+  
+  
+  # mi 
+cardiac_data$mi <- ifelse(
+  cardiac_data$hypertension == 1 |
+    cardiac_data$diabetes == 1 |
+    cardiac_data$smoking == 1 |
+    cardiac_data$cholesterol > 240,
+  rbinom(n_patients, 1, 0.3),  # Higher probability
+  rbinom(n_patients, 1, 0.05)  # Lower probability
+)
+
+
+```
+
+
+we need to have a look at the data to be sure whether all the variables we want are there. 
+```{r}
+colnames(cardiac_data) #this prints all the column names.
+
+head(cardiac_data,10)#this will show us the first ten rows of the dataset.
+```
+checking the data that we have requires us to take a peek of the data generated.
+```{r}
+summary(cardiac_data)
+```
+
+We use the table function to check distributions. The distributions show us how many participants are in each category.
+
+```{r}
+# Check distributions
+table(cardiac_data$age_group)
+table(cardiac_data$sex)
+table(cardiac_data$bmi_category)
+```
+\textbf{Tests}
+
+
+We test whether there is a significant relationship between hypertension and mi.
+
+```{r}
+# Create contingency table for hypertension and MI
+table(Hypertension = cardiac_data$hypertension, MI = cardiac_data$mi)
+
+# Chi-square test
+chisq.test(cardiac_data$hypertension, cardiac_data$mi)
+
+```
+
+
+ \textbf{Basic visualization}
+ 
+```{r}
+#  MI rates by hypertension status
+ggplot(cardiac_data, aes(x = factor(hypertension), fill = factor(mi))) +
+  geom_bar(position = "fill") +
+  labs(title = "MI Rates by Hypertension Status",
+       x = "Hypertension",
+       y = "Proportion",
+       fill = "MI") +
+  theme_minimal()
+```
+ 
+```{r}
+# Risk factors by age group
+ggplot(cardiac_data, aes(x = age_group, fill = factor(hypertension))) +
+  geom_bar(position = "fill") +
+  labs(title = "Hypertension Rates by Age Group",
+       x = "Age Group",
+       y = "Proportion",
+       fill = "Hypertension") +
+  theme_minimal()
+```
+\textbf{Regressions}
+
+lets try to test the hypothesis that says that there is no relationship between hypertension and mi. we carry out a logistic regression since our outcome is a binary variable. 
+```{r}
+# Simple logistic regression using generalised linear models
+model <- glm(mi ~ hypertension + age_group + sex + bmi_category + diabetes + smoking,
+            family = binomial(link = "logit"),
+            data = cardiac_data)
+
+# Print model summary
+summary(model)
+
+```
+
+From the above, we see that there is a marginally significant relationship between being hypertensive and developing MI. Individuals with hypertension have higher odds of MI (p = 0.0588, marginally significant)keeping other factors constant.
+
+```{r}
+save_data_loc<- here::here("data-exercise", "cardiac_data.rds")
+saveRDS(cardiac_data, save_data_loc)
+
+```
+
+My data set is saved just incase anyone wanted to have a look at it.

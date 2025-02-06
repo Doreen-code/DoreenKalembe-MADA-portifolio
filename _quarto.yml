@@ -14,6 +14,10 @@ website:
             file: starter-analysis-exercise/products/report/starter-analysis-report.qmd
           - text: "R Coding Exercise"
             file: coding-exercise/coding-exercise.qmd
+          - text: "data_exercise"
+            file: data_exercise/data-exercise.qmd
+          - text: "Data Analysis Exercise"
+            file: cdcdata-exercise/cdcdata-exercise.qmd
     right:
       - icon: github 
         href: https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio     

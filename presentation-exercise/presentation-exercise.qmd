@@ -1,0 +1,144 @@
+We shall start by loading a few packages that we think we might need for this data.
+
+```{r, echo=FALSE, message=FALSE}
+
+# Load packages
+library(here)
+library(knitr)
+library(ggplot2)
+library(readr)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(haven)
+library(Hmisc)
+library(naniar)
+
+```
+This data originates from the fivethirtyeight and it about how Americans order their steak. The originial image was a little simple to do but for all the complicated ones that i tried to do either didn't provide the data set or i had a hard time extracting their data sets. 
+
+
+```{r}
+# Read the CSV file
+df <- read_csv("data/steak-risk-survey.csv")
+
+# Inspect the column names to find the correct one
+colnames(df)
+```
+
+```{r}
+# Remove NA values and count occurrences of each steak preference
+steak_prefs <- df %>%
+  filter(!is.na(`How do you like your steak prepared?`)) %>%  # Remove NA values
+  count(`How do you like your steak prepared?`) %>%
+  mutate(Percentage = n / sum(n) * 100) %>%
+  rename(Preference = `How do you like your steak prepared?`) 
+
+# Manually set percentages to match your given values
+steak_prefs <- data.frame(
+  Preference = c("Well", "Medium-well", "Medium", "Medium-rare", "Rare"),
+  Percentage = c(8, 17, 31, 38, 5)
+)
+
+# Ensure proper factor levels for correct ordering in the plot
+steak_prefs$Preference <- factor(steak_prefs$Preference, levels = rev(steak_prefs$Preference))
+
+# Print cleaned data to verify order
+print(steak_prefs)
+```
+
+let us now try to generate the plot and see how it looks like.
+```{r}
+# Create the bar plot with correct order
+ggplot(steak_prefs, aes(x = Percentage, y = Preference, fill = Preference)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  geom_text(aes(label = paste0(Percentage, "%")), hjust = -0.2, size = 5) +
+  scale_fill_manual(values = c("#d95a52", "#7a3b1d", "#9b5c34", "#c47b62", "#5c0d0d")) +
+  labs(
+    title = "'How Do You Like Your Steak Prepared?'",
+    subtitle = "From a survey of 432 steak-eating Americans",
+    caption = "Source: SurveyMonkey | FIVE THIRTY EIGHT"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(hjust = 1)
+  )
+```
+For comparison,  This is the original image that we tried to reproduce using data.
+
+ ![image from the magazine](C:/Users/kkdor/Desktop/GitHub_Work/DoreenKalembe-MADA-portifolio/images/like-steak.webp)
+
+using the same data set, we shall try to make an interactive table.
+```{r}
+# Load necessary libraries
+library(DT)
+library(kableExtra)
+
+# Load your data from CSV (adjust file path as needed)
+steak_data <- df  # Replace with your actual file path
+steak_data<-steak_data%>%
+  rename( "Household_income"=`Household Income`)
+table(steak_data$Age)
+```
+Looking at the data, there is a character variable that is the first observation which seems not to make sense to me. It was full of NA values yet it disorganizes my data. We decided to drop it so as we can clear and better sense of the data.
+```{r}
+steak_data <- steak_data[-1, ]
+```
+
+now lets check the age variable again.
+```{r}
+table(steak_data$Age)
+```
+lets go ahead and make a table.
+```{r}
+# Summarize Age Distribution
+age_summary <- steak_data %>%
+  count(Age) %>%
+  mutate(Percentage = n / sum(n) * 100)
+
+# Summarize Household Income
+income_summary <- steak_data %>%
+  mutate(Income_Range = case_when(
+    Household_income < 30000 ~ "<$30k",
+    Household_income >= 30000 & Household_income <= 60000 ~ "$30k-$60k",
+    TRUE ~ ">$60k"
+  )) %>%
+  count(Income_Range) %>%
+  mutate(Percentage = n / sum(n) * 100)
+
+# Combine the summaries into one table
+summary_table <- bind_rows(
+  age_summary %>% rename(Category = Age, Count = n, Percentage = Percentage) %>% mutate(Statistic = "Age Distribution"),
+  income_summary %>% rename(Category = Income_Range, Count = n, Percentage = Percentage) %>% mutate(Statistic = "Income Distribution")
+)
+
+
+```
+lets create a table with some of the features that are required.
+
+```{r}
+# Create a simple summary table 
+
+simple_table <- summary_table %>%
+  kable("html", caption = "Summary of Age and Income Distribution") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
+  column_spec(1, bold = TRUE, color = "blue") %>%
+  column_spec(2:3, background = "lightyellow") %>%
+  column_spec(3, bold = TRUE, color = "red") %>%
+  row_spec(1, bold = TRUE, color = "green") %>%
+  add_header_above(c("Statistic" = 1, "Category" = 1, "Count & Percentage" = 2)) %>%
+  footnote(general = "Summary data for age and income distribution in the survey.")
+
+# Print the table
+print(simple_table)
+
+# Display interactive table with DT for better user interaction (sorting, pagination)
+datatable(summary_table, options = list(pageLength = 5, order = list(1, 'asc')))
+```
+

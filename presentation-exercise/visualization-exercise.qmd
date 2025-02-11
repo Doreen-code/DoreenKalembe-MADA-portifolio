@@ -1,0 +1,13 @@
+I started by looking for the data on th fivethirtyeight page.
+
+"I asked AI to help me reproduce the image.
+
+"Ai prompt" Can you reproduce for me this image using this data set. I fed it with the data set but unfortunately, i think the Ai i am using doesnt read the data set or i dont know how to do it well. 
+
+it gave me few prompts which i have fully written down in my quarto file of the presentations. 
+I kept changing a few things manually till when i finally landed on what i wanted and when i realised that it is close to what i want, i had to do simple  more touches and then conclude with it.
+
+
+Coming to the tables, I did a fed it an ai prompt. 
+"help me make an interactive table with these characteristics. 
+I listed the characteristics that i wanted. " It produced the first lines of code but my data set was a little messed and hence it needed some cleaning. I went back into the code and removed some observation, recategorised the data then made some summary statistics. 

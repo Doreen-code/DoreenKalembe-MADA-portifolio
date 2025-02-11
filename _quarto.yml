@@ -18,6 +18,8 @@ website:
             file: data_exercise/data-exercise.qmd
           - text: "Data Analysis Exercise"
             file: cdcdata-exercise/cdcdata-exercise.qmd
+          - text: "presentation-exercise"
+            file: presentation-exercise/presentation-exercise.qmd
     right:
       - icon: github 
         href: https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio     

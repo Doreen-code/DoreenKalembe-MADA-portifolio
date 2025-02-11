@@ -122,6 +122,10 @@ summary_table <- bind_rows(
 ```
 lets create a table with some of the features that are required.
 
+Coming to the tables, I did a feed it an ai prompt. 
+"help me make an interactive table with these characteristics. 
+I listed the characteristics that i wanted. " It produced the first lines of code but my data set was a little messed and hence it needed some cleaning. I went back into the code and removed some observation, recategorised the data then made some summary statistics. 
+
 ```{r}
 # Create a simple summary table 
 
@@ -142,3 +146,7 @@ print(simple_table)
 datatable(summary_table, options = list(pageLength = 5, order = list(1, 'asc')))
 ```
 The table has been created successfully.
+Chatgpt was a really a useful tool during this exercise and the more others to come.
+
+I also realized that when I render this project to website, the first part of the table is not shown i dont know why, so after reading Dr Handels reply on one of our classmates project and advised him to save it and then put it up as an image, i did the same. I took a screenshot of it, saved it and then decided to upload it as an image. This is how the first part of the table looks like since you can only see the second part.
+![image of the table](table.png)

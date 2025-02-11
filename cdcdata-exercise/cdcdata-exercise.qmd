@@ -43,6 +43,7 @@ sum(is.na(diab_data$GLUCOSE))
 diab_data<-diab_data%>%     #this will help us drop the na values in the data set.
   drop_na()
 ```
+
 ```{r}
 sum(is.na(diab_data)) #checking to see if all the missing values have been dropped.
 ```
@@ -87,6 +88,9 @@ describe(diab_data, stats = c("mean", "sd", "min", "max", "median", "iqr"))
 table(diab_data$SEX)
 prop.table(table(diab_data$SEX))
 prop.table(table(diab_data$DIABETES))
+
+sd(diab_data$BMI)
+diab_original <- diab_data
 ```
  This description shows us how many individuals belong to each category. There are 1817 males and 2196 females. Out of the 4434 individuals, 45.3% are male and 54.7% are female. The distributions and percentage proportions of the variables are shown in the table.
  
@@ -125,3 +129,152 @@ ggplot(diab_data, aes(x = BMI)) +
 
 ```
 From the above curves, we see that BMI, total cholestral and systolic blood pressure are normally distributed. 
+This part was contributed by Annalise Cramer
+
+Here's the prompt I gave ChatGGPT:
+
+I want you to give me R code to create a dataset called diab_data with 4013 observations. There should be seven variables, SEX, AGE, BMI, TOTALCHOL, SYSBP, DIABETES, and GLUCOSE. SEX is binary with 1 or 2 as outcomes, mean 1.547, where 45.3% are male and 54.7% are female. AGE has a range of 32-70, with a mean of 49.98 and a median of 49. BMI has a range of 15.54-56.80. with a mean of 25.85 and a median of 25.45. TOTALCHOL has a range of 113.0-696.0, with a mean of 237.3 and a median of 234.0. SYSBP has a range of 83.5-295.0, with a mean of 133.0 and a median of 129.0. DIABETES is a binary variable with either 0 or 1, mean of 0.2866. GLUCOSE has a range of 40.00-394.00, with a mean of 82.14 and a median of 78.00. Only individuals with DIABETES=1 should have a GLUCOSE value about 120. TOTALCHOL should follow a roughly normal distribution with mean 220 and standard deviation 55. SYSBP should follow a Poisson distribution. BMI should follow a normal distribution. Do you have any questions?
+
+ChatGPT asked the following clarifying questions:
+
+A few clarifications before generating the dataset:
+
+1.) SEX: You specified that 45.3% are male and 54.7% are female, with a mean of 1.547. This means I'll set 1 = male, 2 = female and ensure the proportions match.
+2.) AGE: Should I assume a normal distribution centered around 49.98 with an appropriate standard deviation to achieve the given median and range?
+3.) BMI: You mentioned it should follow a normal distribution, but you provided only the mean (25.85) and median (25.45). Do you have a standard deviation in mind, or should I estimate one based on a plausible distribution?
+4.) TOTALCHOL: You stated it should be normally distributed with a mean of 220 and SD of 55, but your overall dataset statistics suggest a mean of 237.3. Should I adjust it to 237.3 or stick to 220?
+5.) SYSBP: You mentioned a Poisson distribution but gave a mean of 133. Do you want λ = 133 for the Poisson distribution, or should I adjust it to match the range and median?
+6.) DIABETES: I'll generate this as a Bernoulli variable with a mean of 0.2866.
+7.) GLUCOSE: You mentioned that only diabetic individuals should have GLUCOSE values above 120. Should I model GLUCOSE differently for diabetics (e.g., a normal distribution centered above 120) and non-diabetics (e.g., normal distribution centered around 82.14)?
+Let me know how you’d like me to handle these details!
+
+I responded to these questions with the following:
+
+1.) Yes that's good. 
+2.) Yes, assume a normal distribution with the parameters I gave you. 
+3.) For BMI use a standard deviation of 4.086135. 
+4.) Use 237.3. 
+5.) Adjust to match the range and median. It look like a poisson or a left skewed normal distribution. 
+6.) Okay good. 
+7.) No, do not model them as separate normal distributions. Some people with diabetes may have glucose levels under 120, but no one without diabetes should have a glucose level above 120.
+
+
+Here's the code given by ChatGPT to generate the data.
+```{r}
+set.seed(42)  # For reproducibility
+
+# Number of observations
+n <- 4013
+
+# Generate SEX (1 = male, 2 = female) with given proportions
+SEX <- sample(c(1, 2), size = n, replace = TRUE, prob = c(0.453, 0.547))
+
+# Generate AGE from a normal distribution and round to integers
+AGE <- round(rnorm(n, mean = 49.98, sd = (70 - 32) / 6))
+AGE <- pmax(pmin(AGE, 70), 32)  # Ensure within range
+
+# Generate BMI from a normal distribution
+BMI <- rnorm(n, mean = 25.85, sd = 4.086135)
+BMI <- pmax(pmin(BMI, 56.80), 15.54)  # Ensure within range
+
+# Generate TOTALCHOL from a normal distribution
+TOTALCHOL <- rnorm(n, mean = 237.3, sd = 55)
+TOTALCHOL <- pmax(pmin(TOTALCHOL, 696.0), 113.0)  # Ensure within range
+
+# Generate SYSBP - left-skewed normal-like distribution
+SYSBP <- rnorm(n, mean = 133, sd = 25)
+SYSBP <- pmax(pmin(SYSBP, 295.0), 83.5)  # Ensure within range
+
+# Generate DIABETES as a Bernoulli variable
+DIABETES <- rbinom(n, 1, 0.2866)
+
+# Generate GLUCOSE ensuring non-diabetics have ≤ 120
+GLUCOSE <- runif(n, 40, 120)  # Base glucose distribution
+GLUCOSE[DIABETES == 1] <- runif(sum(DIABETES), 120, 394)  # Adjust diabetics
+
+# Create data frame
+diab_data <- data.frame(SEX, AGE, BMI, TOTALCHOL, SYSBP, DIABETES, GLUCOSE)
+
+# Display summary statistics
+summary(diab_data)
+```
+
+Let's make Doreen's figures to try to see if the data matches. I'll rename Doreen's data to diab_original. 
+```{r}
+describe(diab_data, stats = c("mean", "sd", "min", "max", "median", "iqr"))
+table(diab_data$SEX)
+prop.table(table(diab_data$SEX))
+prop.table(table(diab_data$DIABETES))
+```
+
+
+So far, the synthetic data is doing a good job mathcing the original in terms of descriptive statistics. Let's see how it ohld up when I make the plots.
+```{r}
+ggplot(diab_original, aes(x = GLUCOSE, y = BMI, color = as.factor(DIABETES))) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Scatter plot of Glucose vs BMI", x = "Glucose", y = "BMI") +
+  theme_minimal()
+
+ggplot(diab_data, aes(x = GLUCOSE, y = BMI, color = as.factor(DIABETES))) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Scatter plot of Glucose vs BMI", x = "Glucose", y = "BMI") +
+  theme_minimal()
+```
+
+These don't match great. I don't think the synthetic data does a good job of matching the distribution of the glucose. I specified that it should be normal and the means. 
+
+Let's try the next plots.
+```{r}
+ggplot(diab_original, aes(x = as.factor(DIABETES), y = GLUCOSE, fill = as.factor(SEX))) +
+  geom_boxplot() +
+  labs(title = "Glucose Levels by Diabetes Outcome", x = "Diabetes (0 = No, 1 = Yes)", y = "Glucose")
+
+ggplot(diab_data, aes(x = as.factor(DIABETES), y = GLUCOSE, fill = as.factor(SEX))) +
+  geom_boxplot() +
+  labs(title = "Glucose Levels by Diabetes Outcome", x = "Diabetes (0 = No, 1 = Yes)", y = "Glucose")
+
+```
+
+The non-diabetic data matches pretty well, t=but the diabetic data has much higher glucose. I think this is the same problem as in the previous plots, where the distribution is wrong.
+
+```{r}
+# Histogram of total cholestral
+ggplot(diab_original, aes(x = TOTCHOL)) + 
+  geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "chloestral level Distribution", x = "Cholestral levels", y = "Count")
+
+ggplot(diab_data, aes(x = TOTALCHOL)) + 
+  geom_histogram(binwidth = 5, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "chloestral level Distribution", x = "Cholestral levels", y = "Count")
+
+# Histogram of systolic blood pressure
+ggplot(diab_original, aes(x = SYSBP)) + 
+  geom_histogram(binwidth = 5, fill = "yellow", color = "black", alpha = 0.7) +
+  labs(title = "systolic blood pressure distribution", x = "sysBP", y = "Count")
+
+ggplot(diab_data, aes(x = SYSBP)) + 
+  geom_histogram(binwidth = 5, fill = "yellow", color = "black", alpha = 0.7) +
+  labs(title = "systolic blood pressure distribution", x = "sysBP", y = "Count")
+
+# Density plot for BMI
+ggplot(diab_original, aes(x = BMI)) +
+  geom_density(fill = "red", alpha = 0.5) +
+  labs(title = "BMI Density Plot", x = "BMI", y = "Density")
+
+ggplot(diab_data, aes(x = BMI)) +
+  geom_density(fill = "red", alpha = 0.5) +
+  labs(title = "BMI Density Plot", x = "BMI", y = "Density")
+
+```
+
+These don't look half bad. They look wider, but when comparing the x-axes, these aren't too far off. Notably, the high value outliers aren't present. The distirbutions are shaped correctly, even the tricky left skew. However, the sythetic data has a problem with over representing the lowest values.
+
+
+
+
+
+
+
+
+
+

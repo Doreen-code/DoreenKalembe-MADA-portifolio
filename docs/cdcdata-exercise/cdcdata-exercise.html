@@ -147,6 +147,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../cdcdata-exercise/cdcdata-exercise.html">
  <span class="dropdown-text">Data Analysis Exercise</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../presentation-exercise/presentation-exercise.html">
+ <span class="dropdown-text">presentation-exercise</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -410,14 +414,19 @@ Proportion         0.438         0.129         0.421         0.012
          0          1 
 0.97134313 0.02865687 </code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(diab_data<span class="sc">$</span>BMI)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.086135</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>diab_original <span class="ot">&lt;-</span> diab_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This description shows us how many individuals belong to each category. There are 1817 males and 2196 females. Out of the 4434 individuals, 45.3% are male and 54.7% are female. The distributions and percentage proportions of the variables are shown in the table.</p>
 <p>Lets make some visualisations for the data that we have and also explore some some relationships between some variables</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> GLUCOSE, <span class="at">y =</span> BMI, <span class="at">color =</span> <span class="fu">as.factor</span>(DIABETES))) <span class="sc">+</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatter plot of Glucose vs BMI"</span>, <span class="at">x =</span> <span class="st">"Glucose"</span>, <span class="at">y =</span> <span class="st">"BMI"</span>) <span class="sc">+</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> GLUCOSE, <span class="at">y =</span> BMI, <span class="at">color =</span> <span class="fu">as.factor</span>(DIABETES))) <span class="sc">+</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatter plot of Glucose vs BMI"</span>, <span class="at">x =</span> <span class="st">"Glucose"</span>, <span class="at">y =</span> <span class="st">"BMI"</span>) <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -428,9 +437,9 @@ Proportion         0.438         0.129         0.421         0.012
 </div>
 <p>Relationships.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(DIABETES), <span class="at">y =</span> GLUCOSE, <span class="at">fill =</span> <span class="fu">as.factor</span>(SEX))) <span class="sc">+</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Glucose Levels by Diabetes Outcome"</span>, <span class="at">x =</span> <span class="st">"Diabetes (0 = No, 1 = Yes)"</span>, <span class="at">y =</span> <span class="st">"Glucose"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(DIABETES), <span class="at">y =</span> GLUCOSE, <span class="at">fill =</span> <span class="fu">as.factor</span>(SEX))) <span class="sc">+</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Glucose Levels by Diabetes Outcome"</span>, <span class="at">x =</span> <span class="st">"Diabetes (0 = No, 1 = Yes)"</span>, <span class="at">y =</span> <span class="st">"Glucose"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -441,10 +450,10 @@ Proportion         0.438         0.129         0.421         0.012
 </div>
 <p>We can also visualize the distributions of continuous variables.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram of total cholestral</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> TOTCHOL)) <span class="sc">+</span> </span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"chloestral level Distribution"</span>, <span class="at">x =</span> <span class="st">"Cholestral levels"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram of total cholestral</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> TOTCHOL)) <span class="sc">+</span> </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"chloestral level Distribution"</span>, <span class="at">x =</span> <span class="st">"Cholestral levels"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -452,10 +461,10 @@ Proportion         0.438         0.129         0.421         0.012
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram of systolic blood pressure</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> SYSBP)) <span class="sc">+</span> </span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"yellow"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"systolic blood pressure distribution"</span>, <span class="at">x =</span> <span class="st">"sysBP"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram of systolic blood pressure</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> SYSBP)) <span class="sc">+</span> </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"yellow"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"systolic blood pressure distribution"</span>, <span class="at">x =</span> <span class="st">"sysBP"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -463,10 +472,10 @@ Proportion         0.438         0.129         0.421         0.012
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Density plot for BMI</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> BMI)) <span class="sc">+</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"BMI Density Plot"</span>, <span class="at">x =</span> <span class="st">"BMI"</span>, <span class="at">y =</span> <span class="st">"Density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Density plot for BMI</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> BMI)) <span class="sc">+</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"BMI Density Plot"</span>, <span class="at">x =</span> <span class="st">"BMI"</span>, <span class="at">y =</span> <span class="st">"Density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -475,7 +484,270 @@ Proportion         0.438         0.129         0.421         0.012
 </div>
 </div>
 </div>
-<p>From the above curves, we see that BMI, total cholestral and systolic blood pressure are normally distributed.</p>
+<p>From the above curves, we see that BMI, total cholestral and systolic blood pressure are normally distributed. This part was contributed by Annalise Cramer</p>
+<p>Here’s the prompt I gave ChatGGPT:</p>
+<p>I want you to give me R code to create a dataset called diab_data with 4013 observations. There should be seven variables, SEX, AGE, BMI, TOTALCHOL, SYSBP, DIABETES, and GLUCOSE. SEX is binary with 1 or 2 as outcomes, mean 1.547, where 45.3% are male and 54.7% are female. AGE has a range of 32-70, with a mean of 49.98 and a median of 49. BMI has a range of 15.54-56.80. with a mean of 25.85 and a median of 25.45. TOTALCHOL has a range of 113.0-696.0, with a mean of 237.3 and a median of 234.0. SYSBP has a range of 83.5-295.0, with a mean of 133.0 and a median of 129.0. DIABETES is a binary variable with either 0 or 1, mean of 0.2866. GLUCOSE has a range of 40.00-394.00, with a mean of 82.14 and a median of 78.00. Only individuals with DIABETES=1 should have a GLUCOSE value about 120. TOTALCHOL should follow a roughly normal distribution with mean 220 and standard deviation 55. SYSBP should follow a Poisson distribution. BMI should follow a normal distribution. Do you have any questions?</p>
+<p>ChatGPT asked the following clarifying questions:</p>
+<p>A few clarifications before generating the dataset:</p>
+<p>1.) SEX: You specified that 45.3% are male and 54.7% are female, with a mean of 1.547. This means I’ll set 1 = male, 2 = female and ensure the proportions match. 2.) AGE: Should I assume a normal distribution centered around 49.98 with an appropriate standard deviation to achieve the given median and range? 3.) BMI: You mentioned it should follow a normal distribution, but you provided only the mean (25.85) and median (25.45). Do you have a standard deviation in mind, or should I estimate one based on a plausible distribution? 4.) TOTALCHOL: You stated it should be normally distributed with a mean of 220 and SD of 55, but your overall dataset statistics suggest a mean of 237.3. Should I adjust it to 237.3 or stick to 220? 5.) SYSBP: You mentioned a Poisson distribution but gave a mean of 133. Do you want λ = 133 for the Poisson distribution, or should I adjust it to match the range and median? 6.) DIABETES: I’ll generate this as a Bernoulli variable with a mean of 0.2866. 7.) GLUCOSE: You mentioned that only diabetic individuals should have GLUCOSE values above 120. Should I model GLUCOSE differently for diabetics (e.g., a normal distribution centered above 120) and non-diabetics (e.g., normal distribution centered around 82.14)? Let me know how you’d like me to handle these details!</p>
+<p>I responded to these questions with the following:</p>
+<p>1.) Yes that’s good. 2.) Yes, assume a normal distribution with the parameters I gave you. 3.) For BMI use a standard deviation of 4.086135. 4.) Use 237.3. 5.) Adjust to match the range and median. It look like a poisson or a left skewed normal distribution. 6.) Okay good. 7.) No, do not model them as separate normal distributions. Some people with diabetes may have glucose levels under 120, but no one without diabetes should have a glucose level above 120.</p>
+<p>Here’s the code given by ChatGPT to generate the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)  <span class="co"># For reproducibility</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of observations</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">4013</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate SEX (1 = male, 2 = female) with given proportions</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>SEX <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> <span class="fu">c</span>(<span class="fl">0.453</span>, <span class="fl">0.547</span>))</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate AGE from a normal distribution and round to integers</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>AGE <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="fl">49.98</span>, <span class="at">sd =</span> (<span class="dv">70</span> <span class="sc">-</span> <span class="dv">32</span>) <span class="sc">/</span> <span class="dv">6</span>))</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>AGE <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">pmin</span>(AGE, <span class="dv">70</span>), <span class="dv">32</span>)  <span class="co"># Ensure within range</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate BMI from a normal distribution</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>BMI <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="fl">25.85</span>, <span class="at">sd =</span> <span class="fl">4.086135</span>)</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>BMI <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">pmin</span>(BMI, <span class="fl">56.80</span>), <span class="fl">15.54</span>)  <span class="co"># Ensure within range</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate TOTALCHOL from a normal distribution</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>TOTALCHOL <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="fl">237.3</span>, <span class="at">sd =</span> <span class="dv">55</span>)</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>TOTALCHOL <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">pmin</span>(TOTALCHOL, <span class="fl">696.0</span>), <span class="fl">113.0</span>)  <span class="co"># Ensure within range</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate SYSBP - left-skewed normal-like distribution</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>SYSBP <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">133</span>, <span class="at">sd =</span> <span class="dv">25</span>)</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>SYSBP <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">pmin</span>(SYSBP, <span class="fl">295.0</span>), <span class="fl">83.5</span>)  <span class="co"># Ensure within range</span></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate DIABETES as a Bernoulli variable</span></span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>DIABETES <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.2866</span>)</span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate GLUCOSE ensuring non-diabetics have ≤ 120</span></span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>GLUCOSE <span class="ot">&lt;-</span> <span class="fu">runif</span>(n, <span class="dv">40</span>, <span class="dv">120</span>)  <span class="co"># Base glucose distribution</span></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>GLUCOSE[DIABETES <span class="sc">==</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="fu">sum</span>(DIABETES), <span class="dv">120</span>, <span class="dv">394</span>)  <span class="co"># Adjust diabetics</span></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Create data frame</span></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>diab_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(SEX, AGE, BMI, TOTALCHOL, SYSBP, DIABETES, GLUCOSE)</span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Display summary statistics</span></span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(diab_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      SEX             AGE             BMI          TOTALCHOL    
+ Min.   :1.000   Min.   :32.00   Min.   :15.54   Min.   :113.0  
+ 1st Qu.:1.000   1st Qu.:46.00   1st Qu.:22.96   1st Qu.:199.1  
+ Median :2.000   Median :50.00   Median :25.83   Median :237.2  
+ Mean   :1.546   Mean   :49.91   Mean   :25.82   Mean   :237.6  
+ 3rd Qu.:2.000   3rd Qu.:54.00   3rd Qu.:28.55   3rd Qu.:275.3  
+ Max.   :2.000   Max.   :70.00   Max.   :39.89   Max.   :416.6  
+     SYSBP          DIABETES         GLUCOSE      
+ Min.   : 83.5   Min.   :0.0000   Min.   : 40.01  
+ 1st Qu.:115.9   1st Qu.:0.0000   1st Qu.: 67.41  
+ Median :132.7   Median :0.0000   Median : 96.13  
+ Mean   :133.3   Mean   :0.2973   Mean   :134.20  
+ 3rd Qu.:150.2   3rd Qu.:1.0000   3rd Qu.:172.69  
+ Max.   :220.1   Max.   :1.0000   Max.   :393.09  </code></pre>
+</div>
+</div>
+<p>Let’s make Doreen’s figures to try to see if the data matches. I’ll rename Doreen’s data to diab_original.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">describe</span>(diab_data, <span class="at">stats =</span> <span class="fu">c</span>(<span class="st">"mean"</span>, <span class="st">"sd"</span>, <span class="st">"min"</span>, <span class="st">"max"</span>, <span class="st">"median"</span>, <span class="st">"iqr"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>diab_data 
+
+ 7  Variables      4013  Observations
+--------------------------------------------------------------------------------
+SEX 
+       n  missing distinct     Info     Mean 
+    4013        0        2    0.744    1.546 
+                      
+Value          1     2
+Frequency   1821  2192
+Proportion 0.454 0.546
+--------------------------------------------------------------------------------
+AGE 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05 
+    4013        0       39    0.998    49.91       50    7.178       39 
+     .10      .25      .50      .75      .90      .95 
+      42       46       50       54       58       60 
+
+lowest : 32 33 34 35 36, highest: 66 67 68 69 70
+--------------------------------------------------------------------------------
+BMI 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05 
+    4013        0     3994        1    25.82     25.8    4.591    19.12 
+     .10      .25      .50      .75      .90      .95 
+   20.62    22.96    25.83    28.55    31.07    32.51 
+
+lowest : 15.54   15.566  15.6695 15.689  15.7447
+highest: 38.3861 38.4221 39.0084 39.2742 39.8898
+--------------------------------------------------------------------------------
+TOTALCHOL 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05 
+    4013        0     3949        1    237.6    237.4    62.79    144.6 
+     .10      .25      .50      .75      .90      .95 
+   165.7    199.1    237.2    275.3    309.1    330.3 
+
+lowest : 113     113.188 113.844 114.092 114.592
+highest: 399.605 402.167 403.73  406.424 416.604
+--------------------------------------------------------------------------------
+SYSBP 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05 
+    4013        0     3911        1    133.3    133.1    28.17    91.71 
+     .10      .25      .50      .75      .90      .95 
+  100.35   115.85   132.74   150.21   165.21   174.88 
+
+lowest : 83.5    83.5432 83.756  83.7759 84.0645
+highest: 208.476 210.102 210.483 213.928 220.143
+--------------------------------------------------------------------------------
+DIABETES 
+       n  missing distinct     Info      Sum     Mean 
+    4013        0        2    0.627     1193   0.2973 
+
+--------------------------------------------------------------------------------
+GLUCOSE 
+       n  missing distinct     Info     Mean  pMedian      Gmd      .05 
+    4013        0     4013        1    134.2    108.5    98.51    45.22 
+     .10      .25      .50      .75      .90      .95 
+   50.69    67.41    96.13   172.69   308.79   352.75 
+
+lowest : 40.0102 40.0182 40.034  40.0401 40.0456
+highest: 392.332 392.826 392.948 393.038 393.089
+--------------------------------------------------------------------------------</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(diab_data<span class="sc">$</span>SEX)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   1    2 
+1821 2192 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(diab_data<span class="sc">$</span>SEX))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+        1         2 
+0.4537752 0.5462248 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(diab_data<span class="sc">$</span>DIABETES))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+        0         1 
+0.7027162 0.2972838 </code></pre>
+</div>
+</div>
+<p>So far, the synthetic data is doing a good job mathcing the original in terms of descriptive statistics. Let’s see how it ohld up when I make the plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_original, <span class="fu">aes</span>(<span class="at">x =</span> GLUCOSE, <span class="at">y =</span> BMI, <span class="at">color =</span> <span class="fu">as.factor</span>(DIABETES))) <span class="sc">+</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatter plot of Glucose vs BMI"</span>, <span class="at">x =</span> <span class="st">"Glucose"</span>, <span class="at">y =</span> <span class="st">"BMI"</span>) <span class="sc">+</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> GLUCOSE, <span class="at">y =</span> BMI, <span class="at">color =</span> <span class="fu">as.factor</span>(DIABETES))) <span class="sc">+</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatter plot of Glucose vs BMI"</span>, <span class="at">x =</span> <span class="st">"Glucose"</span>, <span class="at">y =</span> <span class="st">"BMI"</span>) <span class="sc">+</span></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-16-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These don’t match great. I don’t think the synthetic data does a good job of matching the distribution of the glucose. I specified that it should be normal and the means.</p>
+<p>Let’s try the next plots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_original, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(DIABETES), <span class="at">y =</span> GLUCOSE, <span class="at">fill =</span> <span class="fu">as.factor</span>(SEX))) <span class="sc">+</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Glucose Levels by Diabetes Outcome"</span>, <span class="at">x =</span> <span class="st">"Diabetes (0 = No, 1 = Yes)"</span>, <span class="at">y =</span> <span class="st">"Glucose"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">as.factor</span>(DIABETES), <span class="at">y =</span> GLUCOSE, <span class="at">fill =</span> <span class="fu">as.factor</span>(SEX))) <span class="sc">+</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Glucose Levels by Diabetes Outcome"</span>, <span class="at">x =</span> <span class="st">"Diabetes (0 = No, 1 = Yes)"</span>, <span class="at">y =</span> <span class="st">"Glucose"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The non-diabetic data matches pretty well, t=but the diabetic data has much higher glucose. I think this is the same problem as in the previous plots, where the distribution is wrong.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram of total cholestral</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_original, <span class="fu">aes</span>(<span class="at">x =</span> TOTCHOL)) <span class="sc">+</span> </span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"chloestral level Distribution"</span>, <span class="at">x =</span> <span class="st">"Cholestral levels"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> TOTALCHOL)) <span class="sc">+</span> </span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"chloestral level Distribution"</span>, <span class="at">x =</span> <span class="st">"Cholestral levels"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram of systolic blood pressure</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_original, <span class="fu">aes</span>(<span class="at">x =</span> SYSBP)) <span class="sc">+</span> </span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"yellow"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"systolic blood pressure distribution"</span>, <span class="at">x =</span> <span class="st">"sysBP"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-18-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> SYSBP)) <span class="sc">+</span> </span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">5</span>, <span class="at">fill =</span> <span class="st">"yellow"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"systolic blood pressure distribution"</span>, <span class="at">x =</span> <span class="st">"sysBP"</span>, <span class="at">y =</span> <span class="st">"Count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-18-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Density plot for BMI</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_original, <span class="fu">aes</span>(<span class="at">x =</span> BMI)) <span class="sc">+</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"BMI Density Plot"</span>, <span class="at">x =</span> <span class="st">"BMI"</span>, <span class="at">y =</span> <span class="st">"Density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-18-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(diab_data, <span class="fu">aes</span>(<span class="at">x =</span> BMI)) <span class="sc">+</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"BMI Density Plot"</span>, <span class="at">x =</span> <span class="st">"BMI"</span>, <span class="at">y =</span> <span class="st">"Density"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="cdcdata-exercise_files/figure-html/unnamed-chunk-18-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These don’t look half bad. They look wider, but when comparing the x-axes, these aren’t too far off. Notably, the high value outliers aren’t present. The distirbutions are shaped correctly, even the tricky left skew. However, the sythetic data has a problem with over representing the lowest values.</p>
 
 
 

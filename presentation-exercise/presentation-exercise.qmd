@@ -72,7 +72,7 @@ ggplot(steak_prefs, aes(x = Percentage, y = Preference, fill = Preference)) +
 ```
 For comparison,  This is the original image that we tried to reproduce using data.
 
- ![image from the magazine](C:/Users/kkdor/Desktop/GitHub_Work/DoreenKalembe-MADA-portifolio/images/like-steak.webp)
+![Steak Preferences Survey](C:/Users/kkdor/Desktop/GitHub_Work/DoreenKalembe-MADA-portifolio/presentation-exercise/steak-image.png)
 
 using the same data set, we shall try to make an interactive table.
 ```{r}
@@ -141,4 +141,4 @@ print(simple_table)
 # Display interactive table with DT for better user interaction (sorting, pagination)
 datatable(summary_table, options = list(pageLength = 5, order = list(1, 'asc')))
 ```
-
+The table has been created successfully.

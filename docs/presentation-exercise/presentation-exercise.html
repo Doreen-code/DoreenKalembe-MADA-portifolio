@@ -311,8 +311,8 @@ dbl  (1): RespondentID
 <p>For comparison, This is the original image that we tried to reproduce using data.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="C:/Users/kkdor/Desktop/GitHub_Work/DoreenKalembe-MADA-portifolio/images/like-steak.webp" class="img-fluid figure-img"></p>
-<figcaption>image from the magazine</figcaption>
+<p><img src="C:/Users/kkdor/Desktop/GitHub_Work/DoreenKalembe-MADA-portifolio/presentation-exercise/steak-image.png" class="img-fluid figure-img"></p>
+<figcaption>Steak Preferences Survey</figcaption>
 </figure>
 </div>
 <p>using the same data set, we shall try to make an interactive table.</p>
@@ -468,10 +468,11 @@ Attaching package: 'kableExtra'</code></pre>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display interactive table with DT for better user interaction (sorting, pagination)</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">datatable</span>(summary_table, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">5</span>, <span class="at">order =</span> <span class="fu">list</span>(<span class="dv">1</span>, <span class="st">'asc'</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-6ab6dd188b06b0a2fed2" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-6ab6dd188b06b0a2fed2">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7"],["18-29","30-44","45-60","&gt; 60",null,"&lt;$30k","&gt;$60k"],[110,133,140,131,36,430,120],[20,24.18181818181818,25.45454545454545,23.81818181818182,6.545454545454546,78.18181818181819,21.81818181818182],["Age Distribution","Age Distribution","Age Distribution","Age Distribution","Age Distribution","Income Distribution","Income Distribution"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Category<\/th>\n      <th>Count<\/th>\n      <th>Percentage<\/th>\n      <th>Statistic<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"order":[1,"asc"],"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Category","targets":1},{"name":"Count","targets":2},{"name":"Percentage","targets":3},{"name":"Statistic","targets":4}],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-93590e77f85179c8d8cc" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-93590e77f85179c8d8cc">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7"],["18-29","30-44","45-60","&gt; 60",null,"&lt;$30k","&gt;$60k"],[110,133,140,131,36,430,120],[20,24.18181818181818,25.45454545454545,23.81818181818182,6.545454545454546,78.18181818181819,21.81818181818182],["Age Distribution","Age Distribution","Age Distribution","Age Distribution","Age Distribution","Income Distribution","Income Distribution"]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Category<\/th>\n      <th>Count<\/th>\n      <th>Percentage<\/th>\n      <th>Statistic<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"order":[1,"asc"],"columnDefs":[{"className":"dt-right","targets":[2,3]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"Category","targets":1},{"name":"Count","targets":2},{"name":"Percentage","targets":3},{"name":"Statistic","targets":4}],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+<p>The table has been created successfully.</p>
 
 
 

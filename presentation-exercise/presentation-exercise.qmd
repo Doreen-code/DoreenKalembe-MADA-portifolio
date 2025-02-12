@@ -70,6 +70,67 @@ ggplot(steak_prefs, aes(x = Percentage, y = Preference, fill = Preference)) +
     plot.caption = element_text(hjust = 1)
   )
 ```
+
+The image I got is close to the original so I asked ai again to help modify this code so that the bars are alittle smaller like the original image. I went ahead and i attached the image for it so that i can know which part to work on.
+I went ahead and modified the code like it suggested.
+
+```{r}
+# Create the bar plot with correct order
+ggplot(steak_prefs, aes(x = Percentage, y = Preference, fill = Preference)) +
+  geom_bar(stat = "identity", width=0.4, show.legend = FALSE) +
+  geom_text(aes(label = paste0(Percentage, "%")), hjust = -0.2, size = 3) +
+  scale_fill_manual(values = c("#d95a52", "#7a3b1d", "#9b5c34", "#c47b62", "#5c0d0d")) +
+  labs(
+    title = "'How Do You Like Your Steak Prepared?'",
+    subtitle = "From a survey of 432 steak-eating Americans",
+    caption = "Source: SurveyMonkey | FIVE THIRTY EIGHT"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(hjust = 1),
+    axis.text.y = element_text(margin = margin(r = -15)),  # Reduce spacing of y-axis labels
+    panel.spacing = unit(0, "lines")  # Reduce panel spacing
+  ) +
+  scale_y_discrete(expand = c(0, 0))  # Reduce expansion of y-axis
+  
+
+
+```
+This turned out to be so spread out and after numerous prompts, Claude ai suggested that we should have 60% bar, 40% space. It went ahead and said that this was a balanced value. After hours of trying to figure it out, I came to the conclusion that may be Claude is right.So I went ahead and adjusted it to what it suggested and penned down. 
+```{r}
+# Create the bar plot with correct order
+ggplot(steak_prefs, aes(x = Percentage, y = Preference, fill = Preference)) +
+  geom_bar(stat = "identity", width=0.6, show.legend = FALSE) +
+  geom_text(aes(label = paste0(Percentage, "%")), hjust = -0.3, size = 3.5) +
+  scale_fill_manual(values = c("#d95a52", "#7a3b1d", "#9b5c34", "#c47b62", "#5c0d0d")) +
+  labs(
+    title = "'How Do You Like Your Steak Prepared?'",
+    subtitle = "From a survey of 432 steak-eating Americans",
+    caption = "Source: SurveyMonkey | FIVE THIRTY EIGHT"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.background = element_rect(fill = "#f0f0f0", color = NA),
+    plot.title = element_text(face = "bold"),
+    axis.title = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(hjust = 1),
+    axis.text.y = element_text(margin = margin(r = -10)),  # Reduce spacing of y-axis labels
+    panel.spacing = unit(0, "lines")  # Reduce panel spacing
+  ) +
+  scale_y_discrete(expand = c(0.00, 0.00))  # Reduce expansion of y-axis
+  
+
+```
 For comparison,  This is the original image that we tried to reproduce using data.
 
 ![Steak PreferencesSurvey](steak-image.png)
@@ -91,11 +152,13 @@ Looking at the data, there is a character variable that is the first observation
 steak_data <- steak_data[-1, ]
 ```
 
+Since I will be using the same data set, I will need to check out the summary statics of a age and income. since these are some of the continuous variables that i have.
 now lets check the age variable again.
 ```{r}
 table(steak_data$Age)
 ```
-lets go ahead and make a table.
+Before making the table, I decided to make some summary statistics of age and also recategorise the house hold income before making some statistics on it.
+
 ```{r}
 # Summarize Age Distribution
 age_summary <- steak_data %>%
@@ -143,10 +206,19 @@ simple_table <- summary_table %>%
 print(simple_table)
 
 # Display interactive table with DT for better user interaction (sorting, pagination)
-datatable(summary_table, options = list(pageLength = 5, order = list(1, 'asc')))
+final_table<-datatable(summary_table, options = list(pageLength = 5, order = list(1, 'asc')))
+final_table
 ```
 The table has been created successfully.
 Chatgpt was a really a useful tool during this exercise and the more others to come.
 
 I also realized that when I render this project to website, the first part of the table is not shown i dont know why, so after reading Dr Handels reply on one of our classmates project and advised him to save it and then put it up as an image, i did the same. I took a screenshot of it, saved it and then decided to upload it as an image. This is how the first part of the table looks like since you can only see the second part.
+
 ![image of the table](table.png)
+
+After going through the comments on discord, I was advised to save this image as and make it as reproducible as possible but all the prompts on chat gpt redid the tabe that you can see but not the one with colors.
+
+
+
+
+

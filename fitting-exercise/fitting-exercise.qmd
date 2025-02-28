@@ -1,0 +1,317 @@
+We shall start by loading a few packages that we think we might need for this data.
+
+```{r, echo=FALSE, message=FALSE}
+
+# Load packages
+library(here)
+library(knitr)
+library(ggplot2)
+library(readr)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(haven)
+library(Hmisc)
+library(naniar)
+
+```
+
+We shall start by loading the data set and the exploring it to see what it contains. 
+```{r}
+# Read the CSV file
+Mavo_data<- read_csv("data/Mavoglurant_A2121_nmpk.csv")
+
+# Inspect the column names to find the correct one
+colnames(Mavo_data)
+```
+lets go through the data set and see what it entails.
+```{r}
+glimpse(Mavo_data) 
+```
+The data set contains 2678 observations and 17 variables. 
+code to make a plot that shows a line for each individual, with DV on the y-axis and time on the x-axis. Stratify by dose 
+```{r}
+Mavo_data%>%
+  ggplot(aes(x=TIME, y= DV, group = ID,  color= factor(DOSE)))+
+  geom_line()+ 
+    labs(title = "DV over Time Stratified by Dose",
+       x = "Time",
+       y = "Outcome Variable (DV)",
+       color = "Dose") +
+  theme_minimal()
+
+```
+Keeping observations with OCC= 1
+```{r}
+Mavo_data2<- Mavo_data%>%
+ filter(OCC!=2) # this will exclude everyone with occ=2.
+ 
+```
+
+lets exclude everyone with everyone with time =0.
+and then create a another variable Y which is the sum of DV
+```{r}
+class(Mavo_data2)
+```
+
+
+```{r}
+summary_data <- Mavo_data2 %>%
+  filter(TIME != 0) %>%  # Remove rows where TIME = 0
+   dplyr::group_by(ID) %>%
+  dplyr::summarize(Y = sum(DV, na.rm = TRUE), .groups = "drop")  # Sum DV for each individual
+
+print(summary_data)  
+ 
+```
+creating a data frame that contains observations with time =0.
+```{r}
+Mavo_data3<-Mavo_data2 %>%
+  filter(TIME == 0)  # includes rows where TIME = 0
+#This contains 120X17
+
+```
+using an appropiate join function to combine the two data frames
+
+```{r}
+joined_data<-full_join(summary_data, Mavo_data3, by ="ID")
+```
+
+Converting RACE and SEX to factor variables and keeping only these variables: Y,DOSE,AGE,SEX,RACE,WT,HT.
+```{r}
+
+# Converting  SEX to a factor 
+joined_data$SEX <- as.factor(joined_data$SEX)
+
+# Converting  race to a factor 
+joined_data$RACE <- as.factor(joined_data$RACE)
+
+# Check the structure of the joined dataset using the str function
+str(joined_data)
+```
+finally, we need to select the variables that we shall need for our analaysis. 
+```{r}
+final_data<-joined_data%>%
+  select(Y,DOSE,AGE,SEX,RACE,WT,HT)
+```
+ lets make some exploratory data analysis and some further cleaning 
+ 
+```{r}
+summary(final_data) #we use the summary function to see that summary statistics of each variable in the data set
+```
+ from the 120 observations,104 are males and 16 are females. thats if 1 is males and 2 is coded for females. According to the dataset we have, we are  not sure since the code book was not provided.
+ 
+```{r}
+
+# Compute summary statistics for all continuous variables
+summary_table<- final_data %>%
+  select(where(is.numeric)) %>%  # Select only numeric variables
+  summarise(
+    across(
+      everything(), 
+      list(
+        Mean = ~mean(.x, na.rm = TRUE),
+        Median = ~median(.x, na.rm = TRUE),
+        SD = ~sd(.x, na.rm = TRUE),
+        Min = ~min(.x, na.rm = TRUE),
+        Max = ~max(.x, na.rm = TRUE)
+      ),
+      .names = "{.col}_{.fn}"  # Renaming format: VariableName_Statistic
+    )
+  ) %>%
+  tidyr::pivot_longer(everything(), names_to = c("Variable", "Statistic"), names_sep = "_") %>%
+  tidyr::pivot_wider(names_from = "Statistic", values_from = "value")
+
+# Print summary
+print(summary_table)
+
+```
+ 
+ lets check whether there is some correlation between variables
+```{r}
+# Select only numeric columns
+numeric_data <- final_data %>% select(where(is.numeric))
+
+# Compute correlation matrix
+cor_matrix <- cor(numeric_data, use = "complete.obs")
+
+# Visualize correlation matrix
+library(ggcorrplot)
+ggcorrplot(cor_matrix, lab = TRUE)
+```
+From the above, looks like there is no variable that is highly correlated with the other.
+
+lets explore our new variable Y using a histogram to see its distribution.
+we shall also try to explore Y by the categorical variables
+```{r}
+# Histogram of Y variable (sum of DV)
+ggplot(final_data, aes(x = Y)) + 
+  geom_histogram(bins = 30, fill = "blue", alpha = 0.7) + 
+  theme_minimal() + 
+  labs(title = "Distribution of Y")
+
+ggplot(final_data, aes(x = SEX, y = Y, fill = SEX)) + 
+  geom_boxplot() + 
+  theme_minimal() + 
+  labs(title = "Y by SEX")
+
+ggplot(final_data, aes(x = RACE, y = Y, fill = RACE)) + 
+  geom_boxplot() + 
+  theme_minimal() + 
+  labs(title = "Y by RACE")
+```
+From the above, we see that Y is not normally distributed. it appears to be right skewed which means that some individuals have high sums of DV or simply we could have some potential outliers.
+
+Also, assuming males are 1 and females are 2, then males have higher DV sums compared to females.
+
+In regards to race, race 1 and 2 have almost similar DV sums compared to race 7 and 88.Though race 7 has higher sum compared to race 88.
+
+
+lets see some scatter plot of Y as an outcome with the other continuous variables.
+```{r}
+final_data %>%
+select(Y, DOSE, AGE, WT, HT) %>%
+pairs()#this code will show the scatter plots of the continuous variables in the data set.
+```
+We shall now start working on  fitting the model using linear regression and logistic regression and the interprete the outputs.
+Fit a linear model to the continuous outcome (Y) using the main predictor of interest, which we’ll assume here to be DOSE.
+Fit a linear model to the continuous outcome (Y) using all predictors.
+For both models, compute RMSE and R-squared and print them.
+```{r}
+#fitting a linear model with y as the outcome and dose as the predictor
+model1<- lm(Y~DOSE,data=final_data)
+summary(model1)
+
+```
+Lets try fitting Y with all the predictors.
+```{r}
+model2<-lm(Y~ DOSE+AGE+SEX+RACE+WT+HT, data = final_data)
+summary(model2)
+
+```
+computing the RMSE and the R squared of the models
+```{r}
+r_squared_model1 <- summary(model1)$r.squared
+r_squared_model2 <- summary(model2)$r.squared
+
+#computing the RMSE
+rmse_model1 <- sqrt(mean(model1$residuals^2))
+rmse_model2 <- sqrt(mean(model2$residuals^2))
+
+#Printing the rsmes and the r-squared
+print(paste("Model 1 - RMSE:", rmse_model1, "R-squared:", r_squared_model1))
+print(paste("Model 2 - RMSE:", rmse_model2, "R-squared:", r_squared_model2))
+```
+Fit a logistic model to the categorical/binary outcome (SEX) using the main predictor of interest, which we’ll again assume here to be DOSE.
+Fit a logistic model to SEX using all predictors.
+For both models, compute accuracy and ROC-AUC and print them.
+
+Let us try to fit another model with sex as the outcome
+
+```{r}
+# Fit logistic regression model with sex as the outcome and dose as the predictor.
+logit_model1 <- glm(SEX ~ DOSE, data = final_data, family = binomial(link = "logit"))
+
+# Fit logistic regression model with sex as the outcome and all the predictors.
+logit_model2 <- glm(SEX ~ Y+ DOSE + AGE + RACE + WT + HT, data = final_data, family = binomial)
+
+print(summary(logit_model1))
+print(summary(logit_model2))
+```
+Let us try to calculate the odds ratios so as we can interprete these results better
+```{r}
+# Extract the model coefficients for model 1
+coefficients <- summary(logit_model1)$coefficients[, 1]
+
+# Calculate the odds ratios by exponentiating the coefficients
+odds_ratios <- exp(coefficients)
+
+# Print the odds ratios
+print(odds_ratios)
+
+
+# Extract the model coefficients for model 2
+coefficients <- summary(logit_model2)$coefficients[, 1]
+
+# Calculate the odds ratios by exponentiating the coefficients
+odds_ratios_2<- exp(coefficients)
+
+# Print the odds ratios
+print(odds_ratios_2)
+
+```
+
+we shall then compute the accuracy and ROC-AUC and print them.
+```{r}
+# Model with only DOSE
+predicted_probs1 <- predict(logit_model1, type = "response")  # Probabilities for SEX
+
+# Model with all predictors
+predicted_probs2 <- predict(logit_model2, type = "response")
+
+# Convert probabilities to binary class (0 or 1)
+predicted_class1 <- ifelse(predicted_probs1 > 0.5, 1, 0)
+predicted_class2 <- ifelse(predicted_probs2 > 0.5, 1, 0)
+
+# Accuracy calculation
+accuracy1 <- mean(predicted_class1 == final_data$SEX)
+accuracy2 <- mean(predicted_class2 == final_data$SEX)
+
+print(paste("Logit mode 1 - Accuracy:", accuracy1))
+print(paste("Logit Model 2 - Accuracy:", accuracy2))
+
+
+```
+Computing the ROC-AUC 
+```{r}
+library(pROC)             # this package will help us calculate the roc-auc
+
+
+# Compute AUC for both models
+auc1 <- roc(final_data$SEX, predicted_probs1)$auc
+auc2 <- roc(final_data$SEX, predicted_probs2)$auc
+
+print(paste("Logit Model 1 - AUC:", auc1))
+print(paste("Logit Model 2 - AUC:", auc2))
+
+```
+We fitted the data to a linear model and a logistic regression model. When we fitted the linear regression model to the data, in the first model, we found that DOSE is a strong predictor of Y:
+
+The coefficient (Estimate = 58.213) suggests that for every unit increase in DOSE, Y increases by approximately 58.21.
+This effect is highly significant (p < 2e-16), meaning there is strong evidence that DOSE impacts Y.
+
+Looking at the R-squared of this first linear model, we found that the simple linear model had an R-squared = 0.5156, meaning 51.56% of the variance in Y is explained by DOSE alone.
+
+
+While DOSE is a significant predictor, the model might be too simple, as nearly half of the variation in Y is not explained which suggests that other variables might be important. As a result, we decided to fit the second linear model but this time around with other variables.
+Second Model: Y ~ DOSE + AGE + SEX + RACE + WT + HT
+DOSE remains a strong predictor:
+
+The coefficient (Estimate = 59.935) is similar to the first model and still highly significant (p < 2e-16).
+
+Additional variables:
+
+WT (Weight) is also significant (p = 0.000471), with a negative coefficient (-23.047), suggesting that a unit increase in  weight decreases, Y.
+SEX, AGE, and RACE do not contribute meaningful to prediction to Y in this dataset.
+HT (Height) also does not appear to impact Y.
+
+Model fit improved:
+
+R-squared increased to 0.6193, meaning 61.93% of Y’s variance is explained by this model—better than the first model. In conclusion, DOSE remains the strongest predictor in both models, Adding more variables improves model fit, but only WT shows a significant effect in addition to DOSE.
+
+
+Secondly,when we fitted a logistic regression with sex as the main outcome, first we fitted the model with only dose as a predictor
+
+The coefficient for DOSE is -0.03175, meaning that as DOSE increases, the log-odds of the outcome (SEX) decrease slightly, but this effect is not statistically significant (p = 0.192).
+The Intercept represents the baseline log-odds when DOSE = 0.
+
+We fitted the second model with sex as the outcome this time round with other predictors. That is to say, SEX ~ Y + DOSE + AGE + RACE + WT + HT.
+This is a multivariable logistic regression, including multiple predictors.
+HT (Height) has a significant negative association with SEX (Estimate = -33.2, p = 0.0027). This suggests that an increase in height strongly decreases the log-odds of the outcome.
+
+Other variables (Y, DOSE, AGE, RACE, WT) do not have significant p-values (> 0.05), meaning their effects are not strong enough to conclude they impact SEX.
+
+Looking at the residual Deviance (32.077) is much lower than in the first model (92.431), suggesting the second model explains the data much better.
+AIC (50.077)  in this second model is significantly lower than the first model’s AIC (96.431), meaning the second model fits better.
+
+In conclusion, large AUC gap (0.592 vs. 0.980) confirms that adding more predictors greatly improves the model’s ability to differentiate between classes. The model with more predictors has better predictive power and is better.

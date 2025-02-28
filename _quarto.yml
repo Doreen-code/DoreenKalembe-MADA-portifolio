@@ -20,6 +20,8 @@ website:
             file: cdcdata-exercise/cdcdata-exercise.qmd
           - text: "presentation-exercise"
             file: presentation-exercise/presentation-exercise.qmd
+          - text: "fitting-exercise"
+            file: fitting-exercise/fitting-exercise.qmd
     right:
       - icon: github 
         href: https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio     

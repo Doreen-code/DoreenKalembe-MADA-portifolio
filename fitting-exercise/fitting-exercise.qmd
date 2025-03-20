@@ -315,3 +315,207 @@ Looking at the residual Deviance (32.077) is much lower than in the first model 
 AIC (50.077)  in this second model is significantly lower than the first model’s AIC (96.431), meaning the second model fits better.
 
 In conclusion, large AUC gap (0.592 vs. 0.980) confirms that adding more predictors greatly improves the model’s ability to differentiate between classes. The model with more predictors has better predictive power and is better.
+
+
+```{r}
+final_data2<-final_data%>%
+  select( Y, DOSE, AGE, SEX, WT, HT)
+colnames(final_data2)
+```
+
+
+```{r}
+library(tidymodels)
+
+#setting seed
+set.seed(1234)
+# Put 3/4 of the data into the training set 
+data_split <- initial_split(final_data2, prop = 3/4)
+
+# Create data frames for the two sets:
+train_data <- training(data_split)
+test_data  <- testing(data_split)
+
+# Check dimensions to ensure the data has been split successfully.
+dim(train_data)
+dim(test_data)
+```
+fitting the linear models using the train data.
+```{r}
+train_model<-lm(Y~DOSE, data = train_data)
+train_model2<-lm(Y~DOSE+AGE + SEX +WT +  HT , data = train_data)
+train_null <-lm(Y~ 1, data = train_data)
+
+summary(train_model)
+summary(train_model2)
+```
+lets evaluate performance and see how these two models work on the training data
+```{r}
+
+
+# Generate predictions on training data
+#For null mode
+pred_null<- predict(train_null, train_data)
+# For model 1 (dose only)
+pred_model1 <- predict(train_model, train_data)
+
+# For model 2 (all predictors)
+pred_model2 <- predict(train_model2, train_data)
+
+# Let's Calculate RMSE for each model
+# First, get the actual outcome values
+actual_values <- train_data$Y 
+
+# Calculate RMSE manually for null model 
+rmse_null <- sqrt(mean((actual_values - pred_null)^2))
+
+# Calculate RMSE manually for model 1
+rmse_model1 <- sqrt(mean((actual_values - pred_model1)^2))
+
+# Calculate RMSE manually for model 2
+rmse_model2 <- sqrt(mean((actual_values - pred_model2)^2))
+
+# Print results
+cat("RMSE for null model :", rmse_null, "\n")
+cat("RMSE for model with dose only:", rmse_model1, "\n")
+cat("RMSE for model with all predictors:", rmse_model2, "\n")
+
+
+
+```
+According to the values of the RMSE, we see that the model with all predictors is performing well since its has the smallest value of the RMSE.
+
+Lets try using the cv method
+```{r}
+
+library(rsample)
+
+# Create 10-fold CV object
+folds <- vfold_cv(train_data, v = 10)
+
+# Define model specifications
+lm_spec <- linear_reg() %>% 
+  set_engine("lm")
+
+# Model 1: Dose only model
+model1_formula <- Y ~ DOSE # Replace 'outcome' with your actual outcome variable name
+
+# Model 2: All predictors
+model2_formula <- Y ~ .  # Replace 'outcome' with your actual outcome variable name
+
+# Function to evaluate a model with CV
+cv_evaluate <- function(formula, model_spec, folds_obj) {
+  # Fit the model to each fold and evaluate
+  cv_results <- folds_obj %>% 
+    mutate(
+      # Fit model on analysis set
+      model = map(splits, ~model_spec %>% 
+                    fit(formula, data = analysis(.x))),
+      
+      # Make predictions and calculate RMSE on assessment set
+      pred = map2(model, splits, ~predict(.x, new_data = assessment(.y))),
+      
+      rmse = map2_dbl(pred, splits, ~rmse_vec(
+        truth = assessment(.y)[[all.vars(formula)[1]]], 
+        estimate = .x$.pred
+      ))
+    )
+  
+  # Return the results
+  return(cv_results)
+}
+
+# Apply CV to both models
+cv_results_model1 <- cv_evaluate(model1_formula, lm_spec, folds)
+cv_results_model2 <- cv_evaluate(model2_formula, lm_spec, folds)
+
+# Calculate mean RMSE across all folds
+mean_rmse_model1 <- mean(cv_results_model1$rmse)
+mean_rmse_model2 <- mean(cv_results_model2$rmse)
+
+# Calculate standard errors
+se_rmse_model1 <- sd(cv_results_model1$rmse) / sqrt(10)
+se_rmse_model2 <- sd(cv_results_model2$rmse) / sqrt(10)
+
+# Print results
+cat("Model 1 (dose only) - CV Results:\n")
+cat("  Mean RMSE:", mean_rmse_model1, "\n")
+cat("  Standard Error:", se_rmse_model1, "\n\n")
+
+cat("Model 2 (all predictors) - CV Results:\n")
+cat("  Mean RMSE:", mean_rmse_model2, "\n")
+cat("  Standard Error:", se_rmse_model2, "\n\n")
+
+# Show individual fold results
+cat("Model 1 - RMSE for each fold:\n")
+print(cv_results_model1$rmse)
+
+cat("\nModel 2 - RMSE for each fold:\n")
+print(cv_results_model2$rmse)
+```
+Comparing the RMSE for CV With the previous RMS.
+
+For model 1, the previous RMSE is 702.8078  while the cv RMSE is is 676.8427
+For model 2, the previous RMSE is 627.441  while the cv RMSE is is 625.9641 
+
+What changed and what did not change.
+
+
+we see that there was a change in the RMSE for model 1 when we used the cross validation technique. The values of RSME dropped. However, there were no major changes in the the RSME in model two. The valued still reduced but by only 2 units.
+
+What didn't change:
+
+The null model RMSE remains the same regardless of the evaluation method since it always predicts the same value which is the mean.
+
+Standard errors:
+
+Model 2 has a lower standard error compared to model1 which contains only dose as a predictor. This shows that model 2 has a better variability in model performance across different subsets of data.
+
+lets set another seed.
+```{r}
+# Set a different random number seed
+set.seed(4567)  # Using a different seed than before
+
+# Create new 10-fold CV object with the new seed
+new_folds <- vfold_cv(train_data, v = 10)
+
+# Apply CV to both models using the new folds
+cv_results_model1_new <- cv_evaluate(model1_formula, lm_spec, new_folds)
+cv_results_model2_new <- cv_evaluate(model2_formula, lm_spec, new_folds)
+
+# Calculate mean RMSE across all folds with new seed
+mean_rmse_model1_new <- mean(cv_results_model1_new$rmse)
+mean_rmse_model2_new <- mean(cv_results_model2_new$rmse)
+
+# Calculate standard errors with new seed
+se_rmse_model1_new <- sd(cv_results_model1_new$rmse) / sqrt(10)
+se_rmse_model2_new <- sd(cv_results_model2_new$rmse) / sqrt(10)
+
+# Print comparison of results with different seeds
+cat("Comparison of CV results with different random seeds:\n\n")
+
+cat("Model 1 (dose only):\n")
+cat("  - Mean RMSE with seed 1234:", mean_rmse_model1, "\n")
+cat("  - Mean RMSE with seed 4567:", mean_rmse_model1_new, "\n")
+cat("  - Difference:", mean_rmse_model1_new - mean_rmse_model1, "\n")
+cat("  - Standard Error with seed 1234:", se_rmse_model1, "\n")
+cat("  - Standard Error with seed 4567:", se_rmse_model1_new, "\n\n")
+
+cat("Model 2 (all predictors):\n")
+cat("  - Mean RMSE with seed 1234:", mean_rmse_model2, "\n")
+cat("  - Mean RMSE with seed 4567:", mean_rmse_model2_new, "\n")
+cat("  - Difference:", mean_rmse_model2_new - mean_rmse_model2, "\n")
+cat("  - Standard Error with seed 1234:", se_rmse_model2, "\n")
+cat("  - Standard Error with seed 4567:", se_rmse_model2_new, "\n\n")
+
+# Check if the conclusion about which model is better remains the same
+better_model_seed123 <- ifelse(mean_rmse_model1 < mean_rmse_model2, "Model 1", "Model 2")
+better_model_seed456 <- ifelse(mean_rmse_model1_new < mean_rmse_model2_new, "Model 1", "Model 2")
+
+cat("Better performing model:\n")
+cat("  - With seed 1234:", better_model_seed123, "\n")
+cat("  - With seed 4567:", better_model_seed456, "\n")
+
+
+```
+The overall performing model is still model 2 that has all the predictors. The changes we see are due to randomness maybe because of the seed change but generally, model 2 is still performing better than model 1.

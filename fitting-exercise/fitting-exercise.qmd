@@ -1,3 +1,9 @@
+---
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
 We shall start by loading a few packages that we think we might need for this data.
 
 ```{r, echo=FALSE, message=FALSE}
@@ -13,10 +19,13 @@ library(tidyverse)
 library(haven)
 library(Hmisc)
 library(naniar)
-
+library(ggplot2)
+library(dplyr)
+library(tidyr)
 ```
 
-We shall start by loading the data set and the exploring it to see what it contains. 
+We shall start by loading the data set and the exploring it to see what it contains.
+
 ```{r}
 # Read the CSV file
 Mavo_data<- read_csv("data/Mavoglurant_A2121_nmpk.csv")
@@ -24,12 +33,17 @@ Mavo_data<- read_csv("data/Mavoglurant_A2121_nmpk.csv")
 # Inspect the column names to find the correct one
 colnames(Mavo_data)
 ```
+
 lets go through the data set and see what it entails.
+
 ```{r}
 glimpse(Mavo_data) 
 ```
-The data set contains 2678 observations and 17 variables. 
-code to make a plot that shows a line for each individual, with DV on the y-axis and time on the x-axis. Stratify by dose 
+
+The data set contains 2678 observations and 17 variables.
+code to make a plot that shows a line for each individual, with DV on the y-axis and time on the x-axis.
+Stratify by dose
+
 ```{r}
 Mavo_data%>%
   ggplot(aes(x=TIME, y= DV, group = ID,  color= factor(DOSE)))+
@@ -41,7 +55,9 @@ Mavo_data%>%
   theme_minimal()
 
 ```
+
 Keeping observations with OCC= 1
+
 ```{r}
 Mavo_data2<- Mavo_data%>%
  filter(OCC!=2) # this will exclude everyone with occ=2.
@@ -50,10 +66,10 @@ Mavo_data2<- Mavo_data%>%
 
 lets exclude everyone with everyone with time =0.
 and then create a another variable Y which is the sum of DV
+
 ```{r}
 class(Mavo_data2)
 ```
-
 
 ```{r}
 summary_data <- Mavo_data2 %>%
@@ -64,13 +80,16 @@ summary_data <- Mavo_data2 %>%
 print(summary_data)  
  
 ```
+
 creating a data frame that contains observations with time =0.
+
 ```{r}
 Mavo_data3<-Mavo_data2 %>%
   filter(TIME == 0)  # includes rows where TIME = 0
 #This contains 120X17
 
 ```
+
 using an appropiate join function to combine the two data frames
 
 ```{r}
@@ -78,6 +97,7 @@ joined_data<-full_join(summary_data, Mavo_data3, by ="ID")
 ```
 
 Converting RACE and SEX to factor variables and keeping only these variables: Y,DOSE,AGE,SEX,RACE,WT,HT.
+
 ```{r}
 
 # Converting  SEX to a factor 
@@ -89,18 +109,24 @@ joined_data$RACE <- as.factor(joined_data$RACE)
 # Check the structure of the joined dataset using the str function
 str(joined_data)
 ```
-finally, we need to select the variables that we shall need for our analaysis. 
+
+finally, we need to select the variables that we shall need for our analaysis.
+
 ```{r}
 final_data<-joined_data%>%
   select(Y,DOSE,AGE,SEX,RACE,WT,HT)
 ```
- lets make some exploratory data analysis and some further cleaning 
- 
+
+lets make some exploratory data analysis and some further cleaning
+
 ```{r}
 summary(final_data) #we use the summary function to see that summary statistics of each variable in the data set
 ```
- from the 120 observations,104 are males and 16 are females. thats if 1 is males and 2 is coded for females. According to the dataset we have, we are  not sure since the code book was not provided.
- 
+
+from the 120 observations,104 are males and 16 are females.
+thats if 1 is males and 2 is coded for females.
+According to the dataset we have, we are not sure since the code book was not provided.
+
 ```{r}
 
 # Compute summary statistics for all continuous variables
@@ -126,8 +152,9 @@ summary_table<- final_data %>%
 print(summary_table)
 
 ```
- 
- lets check whether there is some correlation between variables
+
+lets check whether there is some correlation between variables
+
 ```{r}
 # Select only numeric columns
 numeric_data <- final_data %>% select(where(is.numeric))
@@ -139,10 +166,12 @@ cor_matrix <- cor(numeric_data, use = "complete.obs")
 library(ggcorrplot)
 ggcorrplot(cor_matrix, lab = TRUE)
 ```
+
 From the above, looks like there is no variable that is highly correlated with the other.
 
 lets explore our new variable Y using a histogram to see its distribution.
 we shall also try to explore Y by the categorical variables
+
 ```{r}
 # Histogram of Y variable (sum of DV)
 ggplot(final_data, aes(x = Y)) + 
@@ -160,36 +189,44 @@ ggplot(final_data, aes(x = RACE, y = Y, fill = RACE)) +
   theme_minimal() + 
   labs(title = "Y by RACE")
 ```
-From the above, we see that Y is not normally distributed. it appears to be right skewed which means that some individuals have high sums of DV or simply we could have some potential outliers.
+
+From the above, we see that Y is not normally distributed.
+it appears to be right skewed which means that some individuals have high sums of DV or simply we could have some potential outliers.
 
 Also, assuming males are 1 and females are 2, then males have higher DV sums compared to females.
 
 In regards to race, race 1 and 2 have almost similar DV sums compared to race 7 and 88.Though race 7 has higher sum compared to race 88.
 
-
 lets see some scatter plot of Y as an outcome with the other continuous variables.
+
 ```{r}
 final_data %>%
 select(Y, DOSE, AGE, WT, HT) %>%
 pairs()#this code will show the scatter plots of the continuous variables in the data set.
 ```
-We shall now start working on  fitting the model using linear regression and logistic regression and the interprete the outputs.
+
+We shall now start working on fitting the model using linear regression and logistic regression and the interprete the outputs.
 Fit a linear model to the continuous outcome (Y) using the main predictor of interest, which we’ll assume here to be DOSE.
 Fit a linear model to the continuous outcome (Y) using all predictors.
 For both models, compute RMSE and R-squared and print them.
+
 ```{r}
 #fitting a linear model with y as the outcome and dose as the predictor
 model1<- lm(Y~DOSE,data=final_data)
 summary(model1)
 
 ```
+
 Lets try fitting Y with all the predictors.
+
 ```{r}
 model2<-lm(Y~ DOSE+AGE+SEX+RACE+WT+HT, data = final_data)
 summary(model2)
 
 ```
+
 computing the RMSE and the R squared of the models
+
 ```{r}
 r_squared_model1 <- summary(model1)$r.squared
 r_squared_model2 <- summary(model2)$r.squared
@@ -202,6 +239,7 @@ rmse_model2 <- sqrt(mean(model2$residuals^2))
 print(paste("Model 1 - RMSE:", rmse_model1, "R-squared:", r_squared_model1))
 print(paste("Model 2 - RMSE:", rmse_model2, "R-squared:", r_squared_model2))
 ```
+
 Fit a logistic model to the categorical/binary outcome (SEX) using the main predictor of interest, which we’ll again assume here to be DOSE.
 Fit a logistic model to SEX using all predictors.
 For both models, compute accuracy and ROC-AUC and print them.
@@ -218,7 +256,9 @@ logit_model2 <- glm(SEX ~ Y+ DOSE + AGE + RACE + WT + HT, data = final_data, fam
 print(summary(logit_model1))
 print(summary(logit_model2))
 ```
+
 Let us try to calculate the odds ratios so as we can interprete these results better
+
 ```{r}
 # Extract the model coefficients for model 1
 coefficients <- summary(logit_model1)$coefficients[, 1]
@@ -242,6 +282,7 @@ print(odds_ratios_2)
 ```
 
 we shall then compute the accuracy and ROC-AUC and print them.
+
 ```{r}
 # Model with only DOSE
 predicted_probs1 <- predict(logit_model1, type = "response")  # Probabilities for SEX
@@ -262,7 +303,9 @@ print(paste("Logit Model 2 - Accuracy:", accuracy2))
 
 
 ```
-Computing the ROC-AUC 
+
+Computing the ROC-AUC
+
 ```{r}
 library(pROC)             # this package will help us calculate the roc-auc
 
@@ -275,54 +318,56 @@ print(paste("Logit Model 1 - AUC:", auc1))
 print(paste("Logit Model 2 - AUC:", auc2))
 
 ```
-We fitted the data to a linear model and a logistic regression model. When we fitted the linear regression model to the data, in the first model, we found that DOSE is a strong predictor of Y:
+
+We fitted the data to a linear model and a logistic regression model.
+When we fitted the linear regression model to the data, in the first model, we found that DOSE is a strong predictor of Y:
 
 The coefficient (Estimate = 58.213) suggests that for every unit increase in DOSE, Y increases by approximately 58.21.
-This effect is highly significant (p < 2e-16), meaning there is strong evidence that DOSE impacts Y.
+This effect is highly significant (p \< 2e-16), meaning there is strong evidence that DOSE impacts Y.
 
 Looking at the R-squared of this first linear model, we found that the simple linear model had an R-squared = 0.5156, meaning 51.56% of the variance in Y is explained by DOSE alone.
 
+While DOSE is a significant predictor, the model might be too simple, as nearly half of the variation in Y is not explained which suggests that other variables might be important.
+As a result, we decided to fit the second linear model but this time around with other variables.
+Second Model: Y \~ DOSE + AGE + SEX + RACE + WT + HT DOSE remains a strong predictor:
 
-While DOSE is a significant predictor, the model might be too simple, as nearly half of the variation in Y is not explained which suggests that other variables might be important. As a result, we decided to fit the second linear model but this time around with other variables.
-Second Model: Y ~ DOSE + AGE + SEX + RACE + WT + HT
-DOSE remains a strong predictor:
-
-The coefficient (Estimate = 59.935) is similar to the first model and still highly significant (p < 2e-16).
+The coefficient (Estimate = 59.935) is similar to the first model and still highly significant (p \< 2e-16).
 
 Additional variables:
 
-WT (Weight) is also significant (p = 0.000471), with a negative coefficient (-23.047), suggesting that a unit increase in  weight decreases, Y.
+WT (Weight) is also significant (p = 0.000471), with a negative coefficient (-23.047), suggesting that a unit increase in weight decreases, Y.
 SEX, AGE, and RACE do not contribute meaningful to prediction to Y in this dataset.
 HT (Height) also does not appear to impact Y.
 
 Model fit improved:
 
-R-squared increased to 0.6193, meaning 61.93% of Y’s variance is explained by this model—better than the first model. In conclusion, DOSE remains the strongest predictor in both models, Adding more variables improves model fit, but only WT shows a significant effect in addition to DOSE.
-
+R-squared increased to 0.6193, meaning 61.93% of Y’s variance is explained by this model—better than the first model.
+In conclusion, DOSE remains the strongest predictor in both models, Adding more variables improves model fit, but only WT shows a significant effect in addition to DOSE.
 
 Secondly,when we fitted a logistic regression with sex as the main outcome, first we fitted the model with only dose as a predictor
 
 The coefficient for DOSE is -0.03175, meaning that as DOSE increases, the log-odds of the outcome (SEX) decrease slightly, but this effect is not statistically significant (p = 0.192).
 The Intercept represents the baseline log-odds when DOSE = 0.
 
-We fitted the second model with sex as the outcome this time round with other predictors. That is to say, SEX ~ Y + DOSE + AGE + RACE + WT + HT.
+We fitted the second model with sex as the outcome this time round with other predictors.
+That is to say, SEX \~ Y + DOSE + AGE + RACE + WT + HT.
 This is a multivariable logistic regression, including multiple predictors.
-HT (Height) has a significant negative association with SEX (Estimate = -33.2, p = 0.0027). This suggests that an increase in height strongly decreases the log-odds of the outcome.
+HT (Height) has a significant negative association with SEX (Estimate = -33.2, p = 0.0027).
+This suggests that an increase in height strongly decreases the log-odds of the outcome.
 
-Other variables (Y, DOSE, AGE, RACE, WT) do not have significant p-values (> 0.05), meaning their effects are not strong enough to conclude they impact SEX.
+Other variables (Y, DOSE, AGE, RACE, WT) do not have significant p-values (\> 0.05), meaning their effects are not strong enough to conclude they impact SEX.
 
 Looking at the residual Deviance (32.077) is much lower than in the first model (92.431), suggesting the second model explains the data much better.
-AIC (50.077)  in this second model is significantly lower than the first model’s AIC (96.431), meaning the second model fits better.
+AIC (50.077) in this second model is significantly lower than the first model’s AIC (96.431), meaning the second model fits better.
 
-In conclusion, large AUC gap (0.592 vs. 0.980) confirms that adding more predictors greatly improves the model’s ability to differentiate between classes. The model with more predictors has better predictive power and is better.
-
+In conclusion, large AUC gap (0.592 vs. 0.980) confirms that adding more predictors greatly improves the model’s ability to differentiate between classes.
+The model with more predictors has better predictive power and is better.
 
 ```{r}
 final_data2<-final_data%>%
   select( Y, DOSE, AGE, SEX, WT, HT)
 colnames(final_data2)
 ```
-
 
 ```{r}
 library(tidymodels)
@@ -340,7 +385,9 @@ test_data  <- testing(data_split)
 dim(train_data)
 dim(test_data)
 ```
+
 fitting the linear models using the train data.
+
 ```{r}
 train_model<-lm(Y~DOSE, data = train_data)
 train_model2<-lm(Y~DOSE+AGE + SEX +WT +  HT , data = train_data)
@@ -349,7 +396,9 @@ train_null <-lm(Y~ 1, data = train_data)
 summary(train_model)
 summary(train_model2)
 ```
+
 lets evaluate performance and see how these two models work on the training data
+
 ```{r}
 
 
@@ -383,9 +432,11 @@ cat("RMSE for model with all predictors:", rmse_model2, "\n")
 
 
 ```
+
 According to the values of the RMSE, we see that the model with all predictors is performing well since its has the smallest value of the RMSE.
 
 Lets try using the cv method
+
 ```{r}
 
 library(rsample)
@@ -453,15 +504,17 @@ print(cv_results_model1$rmse)
 cat("\nModel 2 - RMSE for each fold:\n")
 print(cv_results_model2$rmse)
 ```
+
 Comparing the RMSE for CV With the previous RMS.
 
-For model 1, the previous RMSE is 702.8078  while the cv RMSE is is 676.8427
-For model 2, the previous RMSE is 627.441  while the cv RMSE is is 625.9641 
+For model 1, the previous RMSE is 702.8078 while the cv RMSE is is 676.8427 For model 2, the previous RMSE is 627.441 while the cv RMSE is is 625.9641
 
 What changed and what did not change.
 
-
-we see that there was a change in the RMSE for model 1 when we used the cross validation technique. The values of RSME dropped. However, there were no major changes in the the RSME in model two. The valued still reduced but by only 2 units.
+we see that there was a change in the RMSE for model 1 when we used the cross validation technique.
+The values of RSME dropped.
+However, there were no major changes in the the RSME in model two.
+The valued still reduced but by only 2 units.
 
 What didn't change:
 
@@ -469,9 +522,11 @@ The null model RMSE remains the same regardless of the evaluation method since i
 
 Standard errors:
 
-Model 2 has a lower standard error compared to model1 which contains only dose as a predictor. This shows that model 2 has a better variability in model performance across different subsets of data.
+Model 2 has a lower standard error compared to model1 which contains only dose as a predictor.
+This shows that model 2 has a better variability in model performance across different subsets of data.
 
 lets set another seed.
+
 ```{r}
 # Set a different random number seed
 set.seed(4567)  # Using a different seed than before
@@ -518,4 +573,193 @@ cat("  - With seed 4567:", better_model_seed456, "\n")
 
 
 ```
-The overall performing model is still model 2 that has all the predictors. The changes we see are due to randomness maybe because of the seed change but generally, model 2 is still performing better than model 1.
+
+The overall performing model is still model 2 that has all the predictors.
+The changes we see are due to randomness maybe because of the seed change but generally, model 2 is still performing better than model 1.
+
+# This section is contributed by **PRASANGA PAUDEL**
+
+
+WE will first define the three models:
+
+1. Model with only DOSE as predictor.
+2. Model with ALL predictors.
+3. Model with no predictors.
+
+
+```{r}
+# Fitting the models
+train_model <- lm(Y ~ DOSE, data = train_data) #model1
+train_model2 <- lm(Y ~ DOSE + AGE + SEX + WT + HT, data = train_data) #model2
+train_null <- lm(Y ~ 1, data = train_data) #model3
+
+# Generating predictions for each model
+train_data$pred_model1 <- predict(train_model, newdata = train_data)
+train_data$pred_model2 <- predict(train_model2, newdata = train_data)
+train_data$pred_null <- predict(train_null, newdata = train_data)
+
+# Creating a data frame with observed and predicted values for three models
+results <- data.frame(
+  Observed = train_data$Y,
+  Predicted_DOSE = train_data$pred_model1,
+  Predicted_ALL = train_data$pred_model2,
+  Predicted_NULL = train_data$pred_null)
+
+
+# printing the results
+head(results)
+```
+
+The predicted values can be observed in the above table.
+
+
+```{r}
+
+# Reshaping the data into long format for ggplot plotting
+results_long <- results %>%
+  pivot_longer(
+    cols = starts_with("Predicted_"),
+    names_to = "Model",
+    values_to = "Predicted"
+  )
+
+# Creating the plot
+ggplot(results_long, aes(x = Observed, y = Predicted, color = Model, shape = Model)) +
+  geom_point(size = 3, alpha = 0.7) +  # Adding points for observed vs predicted
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +  # Add 45-degree line
+  facet_wrap(~ Model, ncol = 3) +  # using facet by model
+  scale_x_continuous(limits = c(0, 5000)) +  # setting x-axis limits
+  scale_y_continuous(limits = c(0, 5000)) +  # setting y-axis limits
+  labs(
+    x = "Observed Values",
+    y = "Predicted Values",
+    title = "Observed vs Predicted Values for Each Model",
+    color = "Model",
+    shape = "Model"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(size = 12, face = "bold")
+  )
+```
+We can observe that the model with all predictors shows a better fit and less deviance between observed and the predicted values.The DOSE has three categories and only takes three values, thus shows a band of three. The prediction for NULL model is linear as we fitted the model with a constant.
+
+
+```{r}
+
+
+# adding predictions and residuals to the data
+results <- results %>% mutate(Residuals_Model2 = Predicted_ALL - Observed)
+
+# creating the plot
+ggplot(results, aes(x = Predicted_ALL, y = Residuals_Model2)) +
+  geom_point(size = 3, alpha = 0.7, color = "blue") +  # adding points for predicted vs residuals
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +  # Add horizontal line at 0
+  labs(
+    x = "Predicted Values (Model 2)",
+    y = "Residuals (Predicted - Observed)",
+    title = "Predicted vs Residuals for Model 2",
+    subtitle = "Negative residuals are more and higher"
+  ) +
+  scale_y_continuous(limits = c(-max(abs(results$Residuals_Model2)), max(abs(results$Residuals_Model2)))) +  
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12)
+  )
+```
+
+
+```{r}
+# Loading libraries
+library(rsample)
+library(dplyr)
+library(purrr)
+
+# set the random seed back to rngseed
+set.seed(1234)
+
+# Create 100 bootstrap samples from the training data
+boot_samples <- bootstraps(train_data, times = 100)
+
+# defining a function to fit Model 2 and make predictions
+fit_and_predict <- function(split) {
+  # saving the bootstrap sample
+  bootstrap_data <- analysis(split)
+  
+  # fitting Model 2 (Y ~ DOSE + AGE + SEX + WT + HT) to the bootstrap sample
+  model2 <- lm(Y ~ DOSE + AGE + SEX + WT + HT, data = bootstrap_data)
+  
+  # making predictions for the original training data
+  predict(model2, newdata = train_data)
+}
+
+# using the function to each bootstrap sample and store predictions
+predictions_list <- map(boot_samples$splits, fit_and_predict)
+
+# converting the list of predictions to a matrix (array)
+predictions_matrix <- do.call(rbind, predictions_list)
+
+# calculating median and 95% confidence intervals for each data point
+pred_summary <- predictions_matrix |>
+  apply(2, quantile, probs = c(0.025, 0.5, 0.975)) |>
+  t() |>
+  as.data.frame() |>
+  setNames(c("Lower_CI_Median", "Pred_Median", "Upper_CI_Median"))
+
+# calulating mean and 95% confidence intervals for each data point
+mean_ci <- predictions_matrix |>
+  apply(2, function(x) {
+    mean_val <- mean(x)
+    se <- sd(x) / sqrt(length(x))  # standard error of the mean
+    lower_ci <- mean_val - 1.96 * se  # 95% CI lower bound
+    upper_ci <- mean_val + 1.96 * se  # 95% CI upper bound
+    c(lower_ci, mean_val, upper_ci)
+  }) |>
+  t() |>
+  as.data.frame() |>
+  setNames(c("Lower_CI_Mean", "Pred_Mean", "Upper_CI_Mean"))
+
+# merging median and mean summaries
+pred_summary <- cbind(pred_summary, mean_ci)
+
+# adding the observed values from the training data
+pred_summary$Observed <- train_data$Y
+
+# printing the updated summary
+head(pred_summary)
+```
+The confidence interval for both the predicted median and mean is presented in the table above along with the observed value. 
+
+```{r}
+
+# adding the original predictions to the summary table
+pred_summary$Original_Predictions <- predict(lm(Y ~ DOSE + AGE + SEX + WT + HT, data = train_data), newdata = train_data)
+
+# reating the plot
+ggplot(pred_summary, aes(x = Observed)) +
+  geom_point(aes(y = Original_Predictions), color = "lightgreen", size = 2, alpha = 0.8, shape = 16) +  # Original predictions (point estimate)
+  geom_point(aes(y = Pred_Median), color = "blue", size = 1.5, alpha = 0.8, shape = 10) +  # Median of bootstrap predictions (as points)
+  geom_errorbar(aes(ymin = Lower_CI_Median, ymax = Upper_CI_Median), color = "darkgrey", width = 0.2) +  # 95% CI for median
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "black") +  # 45-degree line
+  labs(
+    x = "Observed Values",
+    y = "Predicted Values",
+    title = "Observed vs Predicted Values with Bootstrap Confidence Intervals",
+    subtitle = "Green: Original Predictions, Blue: Median, Grey: 95% CI for Median"
+  ) +
+  scale_x_continuous(limits = c(0, max(pred_summary$Observed, pred_summary$Upper_CI_Median))) +  # x-axis limits
+  scale_y_continuous(limits = c(0, max(pred_summary$Observed, pred_summary$Upper_CI_Median))) +  #y-axis limits
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12)
+  )
+```
+
+The median predictions obtained from bootstrapping procedure are almost simiar and overlap with the original predictions. A lot of the CI seem to cross the 45 degree line which means that the predicted and observed were fairly similar.However, the predicted values are mostly higher as they lie above the 45-degree line.

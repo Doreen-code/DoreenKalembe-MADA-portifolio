@@ -392,7 +392,7 @@ fitting the linear models using the train data.
 train_model<-lm(Y~DOSE, data = train_data)
 train_model2<-lm(Y~DOSE+AGE + SEX +WT +  HT , data = train_data)
 train_null <-lm(Y~ 1, data = train_data)
-
+summary(train_null)
 summary(train_model)
 summary(train_model2)
 ```
@@ -763,3 +763,70 @@ ggplot(pred_summary, aes(x = Observed)) +
 ```
 
 The median predictions obtained from bootstrapping procedure are almost simiar and overlap with the original predictions. A lot of the CI seem to cross the 45 degree line which means that the predicted and observed were fairly similar.However, the predicted values are mostly higher as they lie above the 45-degree line.
+
+
+part 3. lets see how the model works on the test data.
+
+```{r}
+#finding prediction on the test data set using the training data model 2.
+# Generate predictions for test data
+test_predictions <- predict(train_model2, newdata = test_data)
+```
+
+lets make a combined data set so that we can be able to make the visualisation of the model on the two data sets.
+```{r}
+# Create a plot comparing train and test predictions
+
+# Prepare train data for plotting
+train_results <- data.frame(
+  observed = train_data$Y, 
+  predicted = predict(train_model2, newdata = train_data),
+  dataset = "Training"
+)
+
+# Prepare test data for plotting
+test_results <- data.frame(
+  observed = test_data$Y,  
+  predicted = test_predictions,
+  dataset = "Test"
+)
+
+# Combine the data
+all_results <- rbind(train_results, test_results)
+
+```
+
+Lets go ahead and make visualisations of the data
+```{r}
+# Create the plot
+ggplot(all_results, aes(x = observed, y = predicted, color = dataset, shape = dataset)) +
+  geom_point(alpha = 0.7) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  scale_color_manual(values = c("Training" = "blue", "Test" = "red")) +
+  scale_shape_manual(values = c("Training" = 16, "Test" = 17)) +
+  labs(
+    title = "Model Evaluation: Predicted vs. Observed Values",
+    x = "Observed Values",
+    y = "Predicted Values"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Looking at what we have done so far, the model we have chosen performs far better than the null. 
+
+looking at the performance metrics, model 1 with dose only as a predictor performs better than the null model. Model 1 has a better Rsquared and thus better adjusted R squared than the null model. Meaning that the model with only dose explains a upto 45% of the variance in Y.
+
+The null model also has way bigger RMSE as compared to model 1. The null model has a larger value of AIC Compared to model 1 which makes model 1 better than the null model. If the other models were not performing better, i would consider this model since its interpretations make sense to me though this would depend on whether dose is the main predictor variable.
+
+Model 2 with all the predictors further improves the model. All the performances metrics suggest this model as the best model.I would definitely use this model for any real life purpose. Model 2 can explain upto 53% of the variation in Y.
+Looking at the residual Deviance for model 2, is much lower than in the first model, suggesting the second model explains the data much better. This model has a the lowest RMSE  meaning its robust and performs better than all the other models. The values of AIC of model 2 are lower than all the values of the other two models that is null and model 1 meaning the second model fits the data better.
+
+The model with more predictors has better predictive power and is better compared to model 1 and the null model.
+
+In conclusion, model2 shows a clear positive correlation between observed and predicted values since the spread of predictions generally follows the actual observed values, suggesting decent predictive power. Looking at model 1 and the null model, model 2 appears to be capturing the underlying relationships. This means that and the additional predictors in the full model significantly improve prediction accuracy by accounting for variability that model1 and null model cannot explain.
+
+
+
+
+

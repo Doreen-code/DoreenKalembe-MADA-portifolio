@@ -11,10 +11,11 @@ library(here) #for data loading/saving
 
 #path to data
 #note the use of the here() package and not absolute paths
-data_location <- here::here("starter-analysis-exercise","data","processed-data","processeddata.rds")
+data_location2 <- here::here("starter-analysis-exercise","data","processed-data","processeddata2.rds")
 
 #load data. 
-mydata <- readRDS(data_location)
+mydata2 <- readRDS(data_location2)
+
 
 
 ######################################
@@ -24,18 +25,22 @@ mydata <- readRDS(data_location)
 
 ############################
 #### Second model fit
-# fit linear model using height as outcome, weight and gender as predictor
+# fit linear model using height as outcome, and our new variables 
+#waist size and eye color as the predictors
+mydata2$eyecolor<-as.factor(mydata2$eyecolor)
 
-lmfit2 <- lm(Height ~ Weight + Gender, mydata)  
+lmfit3<- lm(Height ~ waistsize + eyecolor, data= mydata2)  
 
 # place results from fit into a data frame with the tidy function
-lmtable2 <- broom::tidy(lmfit2)
+lmtable3 <- broom::tidy(lmfit3)
 
 #look at fit results
-print(lmtable2)
+print(lmtable3)
 
 # save fit results table  
-table_file2 = here("starter-analysis-exercise","results", "tables-files", "resulttable2.rds")
-saveRDS(lmtable2, file = table_file2)
+table_file3 = here("starter-analysis-exercise","results", "tables-files", "resulttable2.rds")
+saveRDS(lmtable3, file = table_file3)
+
+
 
   

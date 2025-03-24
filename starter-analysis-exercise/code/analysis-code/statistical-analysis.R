@@ -37,20 +37,6 @@ print(lmtable1)
 table_file1 = here("starter-analysis-exercise","results", "tables-files", "resulttable1.rds")
 saveRDS(lmtable1, file = table_file1)
 
-############################
-#### Second model fit
-# fit linear model using height as outcome, weight and gender as predictor
 
-lmfit2 <- lm(Height ~ Weight + Gender, mydata)  
-
-# place results from fit into a data frame with the tidy function
-lmtable2 <- broom::tidy(lmfit2)
-
-#look at fit results
-print(lmtable2)
-
-# save fit results table  
-table_file2 = here("starter-analysis-exercise","results", "tables-files", "resulttable2.rds")
-saveRDS(lmtable2, file = table_file2)
 
   

@@ -204,6 +204,31 @@ Individuals in the "Other" gender category are, on average, 4.764 cm shorter tha
 
 {{< pagebreak >}}
 
+
+# This part is contributed by PRASANGA PAUDEL
+
+## New Figure 1: Box Plot 
+The following figure shows the boxplot of Eye-color and Height. 
+```{r}
+#| label: fig-boxplot
+#| fig-cap: "Height and Eye-color boxplot."
+#| echo: FALSE
+knitr::include_graphics(here("starter-analysis-exercise","results","figures","height and eye-color boxplot 2.png"))
+```
+It can be seen that height of different eye-colored individuals are not significantly different, although the the average height are different across the eye-color.
+
+
+## New Figure 2: Scatterplot 
+The following figure shows the scatterplot of Waist-size against Weight. 
+```{r}
+#| label: fig-scatterplot
+#| fig-cap: "Waist-size Vs Weight scatterplot ."
+#| echo: FALSE
+knitr::include_graphics(here("starter-analysis-exercise","results","figures","weight-waist_size-scatterplot2.png"))
+```
+It can be seen that age and weight are somewhat positively correlated.
+
+
 # References
 
 

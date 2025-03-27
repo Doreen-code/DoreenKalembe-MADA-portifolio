@@ -1,0 +1,367 @@
+---
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
+We shall start by loading a few packages that we think we might need for this data.
+
+```{r, echo=FALSE, message=FALSE}
+
+# Load packages
+library(here)
+library(knitr)
+library(ggplot2)
+library(readr)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(haven)
+library(Hmisc)
+library(naniar)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tidymodels)
+
+```
+We shall go ahead and set the seed.
+```{r}
+set.seed(1234)  # Ensures reproducibility
+
+# Read the RDS file
+ml_data<- readRDS("data/final_data.rds")
+
+```
+
+making race 7 and 8 into 3
+```{r}
+ml_data <- ml_data %>%
+  mutate(RACE = as.numeric(as.character(RACE))) %>%  # Convert factor to numeric
+  mutate(RACE = case_when(
+    RACE %in% c(1, 2) ~ RACE, 
+    RACE %in% c(7, 88) ~ 3,
+    TRUE ~ 4  # Ensure all cases have a numeric output
+  ))
+
+```
+
+```{r}
+# Select only numeric (continuous) variables
+continuous_vars <- ml_data %>% select(where(is.numeric))
+
+# Compute correlation matrix
+cor_matrix <- cor(continuous_vars, use = "complete.obs")  # Use only complete cases
+
+```
+
+Lets visualize the correlation plots and see whether we have some variables that are strongly correlated.
+```{r}
+library(ggcorrplot)
+# Generate the correlation plot
+ggcorrplot(cor_matrix, 
+           method = "square",  # Use "square" or "circle" instead of "color"
+           type = "lower",      # Show only lower triangle
+           lab = TRUE,          # Display correlation values
+           lab_size = 3,        # Adjust label size
+           colors = c("blue", "white", "red"),  # Color scale: Negative to positive
+           title = "Correlation Matrix of Continuous Variables",
+           ggtheme = theme_minimal())  # Use a clean theme
+
+```
+# Lets do Data engineering.
+
+Introducing a variable BMI.WE are assuming weight is in kgs and ht is in metres from the variables in the data set.
+```{r}
+
+# Compute BMI and add it as a new column
+ml_data <- ml_data %>%
+  mutate(BMI = WT / (HT ^ 2))  # 
+
+# Preview the data to check if BMI is added correctly
+glimpse(ml_data)
+
+```
+```{r}
+#installing necessary packages
+#install.packages("glmnet")
+#install.packages("ranger")
+library(glmnet)       # For LASSO regression
+library(ranger)  
+```
+
+```{r}
+# . Set random seed for reproducibility
+set.seed(1234)
+rngseed <- 1234
+
+
+#. Create the recipe (preprocessing)
+model_recipe <- recipe(Y ~ ., data = ml_data) %>%
+  step_dummy(all_nominal_predictors()) %>%   # Convert factor variables (like SEX) into numeric dummies
+  step_normalize(all_predictors()) # Optional: normalize predictors
+
+# . Model 1: Linear Model with all predictors
+lm_model <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression")
+
+lm_workflow <- workflow() %>%
+  add_recipe(model_recipe) %>%
+  add_model(lm_model)
+
+# . Model 2: LASSO Regression
+lasso_model <- linear_reg(penalty = 0.1, mixture = 1) %>%
+  set_engine("glmnet") %>%
+  set_mode("regression")
+
+lasso_workflow <- workflow() %>%
+  add_recipe(model_recipe) %>%
+  add_model(lasso_model)
+
+# . Model 3: Random Forest
+rf_model <- rand_forest() %>%
+  set_engine("ranger", seed = rngseed) %>%
+  set_mode("regression")
+
+rf_workflow <- workflow() %>%
+  add_recipe(model_recipe) %>%
+  add_model(rf_model)
+
+```
+
+fit the models here.
+```{r}
+
+# Fit the models
+# Fit each workflow to the entire data set
+lm_fit <- fit(lm_workflow, data = ml_data)
+lasso_fit <- fit(lasso_workflow, data = ml_data)
+rf_fit <- fit(rf_workflow, data = ml_data)
+
+```
+
+let's use the models to make predictions on the entire data set.
+```{r}
+library(yardstick)
+set.seed(1234)
+#Making predictions for each model
+lm_predictions <- predict(lm_fit, new_data = ml_data) %>%
+  bind_cols(ml_data %>% select(Y))
+
+lasso_predictions <- predict(lasso_fit, new_data = ml_data) %>%
+  bind_cols(ml_data %>% select(Y))
+
+rf_predictions <- predict(rf_fit, new_data = ml_data) %>%
+  bind_cols(ml_data%>% select(Y))
+
+# Calculate RMSE for each model
+lm_rmse <- rmse(lm_predictions, truth = Y, estimate = .pred)
+lasso_rmse <- rmse(lasso_predictions, truth = Y, estimate = .pred)
+rf_rmse <- rmse(rf_predictions, truth = Y, estimate = .pred)
+
+# Print RMSE values
+print("Linear Model RMSE:")
+print(lm_rmse)
+print("LASSO Model RMSE:")
+print(lasso_rmse)
+print("Random Forest RMSE:")
+print(rf_rmse)
+
+
+```
+The LASSO and linear regression give the same value of RMSE because the LASSO generally performs a linear regression. It just adds a penalty term that will help shrink some coefficients to zero but since the penalty is 0.1, this is so small and hence the model looks like a standard linear regression model. 
+
+##Create observed vs predicted plots.
+```{r}
+
+# Linear Model Plot
+lm_plot <- ggplot(lm_predictions, aes(x = Y, y = .pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "Linear Model",
+       x = "Observed Values",
+       y = "Predicted Values") +
+  theme_minimal()
+
+# LASSO Model Plot
+lasso_plot <- ggplot(lasso_predictions, aes(x = Y, y = .pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "LASSO Model",
+       x = "Observed Values",
+       y = "Predicted Values") +
+  theme_minimal()
+
+# Random Forest Plot
+rf_plot <- ggplot(rf_predictions, aes(x = Y, y = .pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "Random Forest",
+       x = "Observed Values",
+       y = "Predicted Values") +
+  theme_minimal()
+
+# 4. Arrange and display plots
+library(patchwork)
+combined_plot <- lm_plot + lasso_plot + rf_plot
+
+# Display the plots
+print(combined_plot)
+```
+#Model tuning.
+
+first i will first tune the lasso model.
+
+```{r}
+
+library(glmnet)
+library(ranger)
+
+# Set random seed for reproducibility
+set.seed(1234)
+
+# Create the recipe
+model_recipe <- recipe(Y ~ ., data = ml_data) %>%
+  step_normalize(all_numeric_predictors())%>%
+  step_dummy(all_nominal_predictors())
+
+# 1. LASSO Model Tuning
+# Create a grid of penalty values (50 values linearly spaced on log scale)
+lasso_penalty_grid <- tibble(penalty = 10^seq(from = -5, to = 2, length.out = 50))
+
+# LASSO model specification
+lasso_model <- linear_reg(penalty = tune()) %>%
+  set_engine("glmnet") 
+ 
+
+# LASSO workflow
+lasso_workflow <- workflow() %>% add_model(lasso_model)%>%
+  add_recipe(model_recipe) 
+
+# Tune LASSO model
+lasso_tuning_results <- lasso_workflow %>%
+  tune_grid(
+    resamples = apparent(ml_data),
+    grid = lasso_penalty_grid,
+    metrics = metric_set(yardstick::rmse)
+  )
+
+
+```
+ Making a plot of the lasso tunig results.
+```{r}
+lasso_tuning_results_df <- as.data.frame(lasso_tuning_results$.metrics)
+ggplot(lasso_tuning_results_df, aes(x=penalty, y=.estimate))+
+  geom_line(linewidth=1, color="blue")+
+  scale_x_log10()+
+  labs(x="Log penalty parameter", y="RMSE")+
+  theme_bw()+
+  theme(axis.title.x=element_text(size=20,color="black",margin=margin(t=15),face="bold"),
+         axis.title.y=element_text(size=20,color="black",margin=margin(r=15),face="bold"),
+         axis.text.x=element_text(color="black",size=17,vjust=0),
+         axis.text.y=element_text(color="black",size=17,hjust=1), 
+         legend.position="top",
+         legend.title=element_text(size=15), 
+         legend.text=element_text(size=13,vjust=0))
+
+```
+
+we observe that when the penalty is very small, the RMSE remains relatively constant and low. This is a good indicator that the model behaves similarly to standard linear regression.
+As the penalty increases, the RMSE starts to rise sharply, especially after a certain point. This shows that the model is becoming less effective in at predicting the outcome. This also means that more predictors are strongly constrained and hence the model is losing its ability to capture important relationships in the data.
+
+
+Tunig parameters for Random forests model
+```{r}
+
+# Create a grid of tuning parameters for Random Forest
+
+# Define parameter set
+rf_param_grid <- grid_regular(mtry(range=c(1, 7)),
+                        min_n(range=c(1, 21)),
+                        levels=7)
+
+
+# Random Forest model specification
+rf_model <- rand_forest(
+  mtry = tune(),
+  min_n = tune(),
+  trees = 300
+) %>%
+  set_engine("ranger", seed = rngseed) %>%
+  set_mode("regression")
+
+# Workflow
+rf_workflow <- workflow() %>%add_model(rf_model)%>%
+  add_recipe(recipe(Y ~ ., data = ml_data) %>% 
+               step_normalize(all_numeric_predictors())) 
+  
+
+# Resamples
+rf_resamples <- apparent(ml_data)
+
+# Tune model
+rf_tuning_results <- rf_workflow %>%
+  tune_grid(
+    resamples = rf_resamples,
+    grid = rf_param_grid,
+    metrics = metric_set(yardstick::rmse)
+  )
+
+
+```
+
+Let us now compute the results of this radom forests and later on visualize it.
+
+```{r}
+#lets first turn the results into a data frame.
+rf_tuning_results_df <- as.data.frame(rf_tuning_results$.metrics)
+rf_tuning_results_df
+
+#autoplot(rf_tuning_results_df)
+
+#lets visualize the random forests results.
+ggplot(rf_tuning_results_df, aes(x=mtry, y=min_n, fill=.estimate)) +
+  geom_tile() +
+  scale_fill_distiller(name="RMSE", palette="Spectral", direction=1) + 
+  labs(x="mtry", y="min_n") +
+  theme_bw() +
+  theme(axis.title.x=element_text(size=16,color="black",margin=margin(t=15),face="bold"),
+        axis.title.y=element_text(size=16,color="black",margin=margin(r=15),face="bold"),
+        axis.text.x=element_text(color="black",size=15,vjust=0),
+        axis.text.y=element_text(color="black",size=15,hjust=1), 
+        legend.position="top",
+        legend.title=element_text(size=16), 
+        legend.text=element_text(size=12,vjust=0))
+```
+The out put shows that the lower RMSE is associated with high mtry and lower min_n and vice verse.
+
+#Tunig with CV
+
+```{r}
+set.seed(1234)  # Set seed for reproducibility
+cv_folds_data <- vfold_cv(ml_data, v = 5, repeats = 5)  # Create cross-validation object
+```
+
+Lets define the Lasso and tune the model parameters. We are just using the cv folds but everything else remains the same.
+```{r}
+lasso_tuning_results_cv<-lasso_workflow%>%
+  tune_grid(resamples= cv_folds_data, grid=lasso_penalty_grid, metrics=metric_set(yardstick::rmse))
+
+# Make a plot of tuning results
+autoplot(lasso_tuning_results_cv)  
+```
+As the penalty parameter increases, the RMSE also increases. This looks like the behavior we saw in the first plot for lasso model.
+
+
+Lets tune the model parameters of the random forests model using the same steps but using the cv folds.
+```{r}
+# Workflow to tune the parameter
+rf_tuning_results_cv <- rf_workflow %>% 
+  tune_grid(resamples=cv_folds_data, grid=rf_param_grid, metrics=metric_set(yardstick::rmse))
+
+# Make a plot of tuning results
+autoplot(rf_tuning_results_cv)
+
+```
+

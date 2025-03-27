@@ -115,6 +115,9 @@ finally, we need to select the variables that we shall need for our analaysis.
 ```{r}
 final_data<-joined_data%>%
   select(Y,DOSE,AGE,SEX,RACE,WT,HT)
+
+# Save the final_data2 dataframe as an RDS file
+saveRDS(final_data, file = here("fitting-exercise", "data","final_data.rds"))
 ```
 
 lets make some exploratory data analysis and some further cleaning
@@ -367,6 +370,7 @@ The model with more predictors has better predictive power and is better.
 final_data2<-final_data%>%
   select( Y, DOSE, AGE, SEX, WT, HT)
 colnames(final_data2)
+
 ```
 
 ```{r}

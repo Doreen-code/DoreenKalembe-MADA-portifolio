@@ -159,12 +159,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../ml-models-exercise/ml-models-exercise.html">
  <span class="dropdown-text">Machine Learning</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../tidytuesday-exercise/tidy-tuesday-exercise.html">
+ <span class="dropdown-text">Tidy Tuesday</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/Doreen-code/DoreenKalembe-MADA-portifolio (while the website lives at https://doreen-code.github.io/DoreenKalembe-MADA-portifolio/)"> <i class="bi bi-github" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -573,16 +577,7 @@ Electronic Clinical Quality Measure                Emergency Department
     1.0    73.0   124.5   134.0   178.0   730.0 </code></pre>
 </div>
 </div>
-<p>when we did the log transformation, it did not improve the model fit so we maintained the score variable the way it was.</p>
-<p>Research Question:</p>
-<p>“Can we accurately predict a healthcare performance score using the type of condition, and footnote data completeness?”</p>
-<p>Possible Predictors: condition (categorical – one-hot encoded or label encoded)</p>
-<p>footnote (binary: 0 or 1)</p>
-<p>measure_id or measure_name (optional: but could be useful as features if encoded)</p>
-<p>state (optional: can include as a random effect or feature)</p>
-<p>📊 Outcome: score (continuous → regression problem)</p>
-<p>Hypothesis: “Healthcare performance scores differ systematically by type of healthcare measure (e.g., vaccination vs emergency care), and scores tend to be lower when reports are incomplete.”</p>
-<p>Since the measure id has many different unique variables,we decided to filter it to only include emergency and vaccination.</p>
+<p>When we did the log transformation, it did not improve the model fit so we maintained the score variable the way it was.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the data</span></span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>final_caredata <span class="ot">&lt;-</span> final_caredata <span class="sc">%&gt;%</span></span>

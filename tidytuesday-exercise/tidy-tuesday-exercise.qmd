@@ -194,30 +194,8 @@ table(final_caredata$condition)
 table(final_caredata$footnote)#there are 296 without reports and 936 with reports.
 summary(final_caredata$score)
 ```
+When we did the log transformation, it did not improve the model fit so we maintained the score variable the way it was.
 
-when we did the log transformation, it did not improve the model fit so we maintained the score variable the way it was.
-
-Research Question:
-
-“Can we accurately predict a healthcare performance score using the type of condition, and footnote data completeness?”
-
-Possible Predictors:
-condition (categorical – one-hot encoded or label encoded)
-
-footnote (binary: 0 or 1)
-
-measure_id or measure_name (optional: but could be useful as features if encoded)
-
-state (optional: can include as a random effect or feature)
-
-📊 Outcome:
-score (continuous → regression problem)
-
-
-Hypothesis:
-“Healthcare performance scores differ systematically by type of healthcare measure (e.g., vaccination vs emergency care), and scores tend to be lower when reports are incomplete.”
-
-Since the measure id has many different unique variables,we decided to filter it to only include emergency and vaccination.
 ```{r}
 
 # Filter the data

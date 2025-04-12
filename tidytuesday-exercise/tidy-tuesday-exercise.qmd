@@ -1,0 +1,409 @@
+---
+title: "R Coding tidy tuesday Exercise"
+---
+
+#Placeholder file for the future R coding exercise.
+
+#we are installing these packages and loading the different libraries that are 
+#required for the different sets of code to run in R.
+```{r}
+required_packages <- c("tidyverse", "tidymodels", "ranger", "xgboost", "kernlab")
+new_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
+if(length(new_packages) > 0) {
+  cat("Installing missing packages:", paste(new_packages, collapse=", "), "\n")
+  install.packages(new_packages)
+}
+
+# For data manipulation and visualization
+library(tidymodels)
+
+library(dslabs)
+library(tidyverse)
+library(dplyr)
+library(naniar)
+```
+load the data
+
+```{r}
+# Option 2: Read directly from GitHub
+
+care_state <- readr::read_csv("data/care_state.csv")
+glimpse(care_state)
+colnames(care_state)
+```
+lets check whether the data has some missing values
+```{r}
+library(janitor)
+care_state<- care_state %>% clean_names()#make names easier to work with
+#check for missing values
+```
+lets check for some missing data
+```{r}
+# Count missing values
+colSums(is.na(care_state))
+
+# Visualize missing data
+library(naniar)
+vis_miss(care_state)
+
+```
+
+since we can see some missing data and double imputations,we decided to combine the value of footnote to if it was recored as 5,then it meant the participant didnot have records and if it was recorded as 25 or 25 and 26, then that means the participants had records.
+```{r}
+care_data <- care_state %>%
+  mutate(
+    footnote_recode = case_when(
+      str_detect(footnote, "25|26") ~ 1,
+      str_detect(footnote, "5") ~ 0,
+      TRUE ~ NA_real_
+    )
+  )
+  
+
+```
+
+let me drop the footnote since we already have another variable of the same name.
+```{r}
+care_data<-care_data%>%
+  select(-footnote)
+```
+
+
+since some of  the data is missing, we shall impute them using mean because dropping them means we are going to miss out on important data.
+```{r}
+sum(is.na(care_data$score))
+
+sum(is.na(care_data$footnote_recode))
+```
+
+```{r}
+# Replace missing values in numeric columns with the column mean
+care_data<- care_data%>%
+  mutate(
+    score = if_else(is.na(score), mean(score, na.rm = TRUE), score)
+  )
+```
+we would like to see if missing data here is due to randomness or it follows a specific pattern.
+
+```{r}
+table(care_data$condition)
+```
+
+
+
+
+```{r}
+care_data <- care_data %>%
+  mutate(footnote_missing = is.na(footnote_recode))
+
+
+ggplot(care_data, aes(x = condition, fill = footnote_missing)) +
+  geom_bar(position = "fill") +
+  labs(y = "Proportion", fill = "Missing Footnote")
+
+```
+
+since we see that missingness likely follows a common pattern, we shall replace missing values in the footnote recorde with the most frequent value. 
+
+```{r}
+# Find mode within each group (example: by state)
+library(dplyr)
+
+care_data <- care_data %>%
+  group_by(condition) %>%
+  mutate(
+    footnote_recode2 = if_else(
+      is.na(footnote_recode),
+      first(footnote_recode[!is.na(footnote_recode)][which.max(table(footnote_recode[!is.na(footnote_recode)]))]),
+      footnote_recode
+    )
+  ) %>%
+  ungroup()
+
+
+```
+lets now have our final data that we shall use for wrangling
+```{r}
+final_caredata<-care_data%>%
+  select(-footnote_recode, -footnote_missing
+         )
+final_caredata<-final_caredata%>%
+  rename(footnote= footnote_recode2)
+```
+
+Lets explore the data.
+```{r}
+final_caredata %>%
+  select(where(is.numeric)) %>%
+  summarise_all(~shapiro.test(.)$p.value)
+#looks like the numeridcal and continuous variable is not normally distributed.
+
+
+
+ggplot(final_caredata, aes(x = score)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "white", alpha = 0.8) +
+  labs(
+    title = "Distribution of Score",
+    x = "Score",
+    y = "Frequency"
+  ) +
+  theme_minimal()
+
+```
+
+lets explore with some tables and figures.
+```{r}
+# Check if log-transform is needed
+ggplot(final_caredata, aes(x = log(score + 1))) +  # +1 in case of 0s
+  geom_histogram(bins = 30, fill = "tomato", color = "black") +
+  theme_minimal() +
+  labs(title = "Log-Transformed Score Distribution", x = "Log(Score)", y = "Count")
+
+
+#lets check out outliers
+boxplot(final_caredata$score, main = "Boxplot of Score", col = "lightgreen")
+
+```
+When we log transformed the data, it now looks a little symmetric compared to the one thats not transformed. 
+
+```{r}
+# Explore the relationship between condition and score
+final_caredata %>%
+  ggplot(aes(x = condition, y = score)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Performance Score by Condition Type",
+       x = "Condition", y = "Score") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+lets check other relationships
+```{r}
+# Check relationship between footnote and score
+final_caredata %>%
+  ggplot(aes(x = factor(footnote), y = score)) +
+  geom_boxplot(fill = "lightgreen") +
+  labs(title = "Performance Score by Footnote Status",
+       x = "Footnote", y = "Score") +
+  theme_minimal()
+```
+
+
+```{r}
+table(final_caredata$condition)
+
+table(final_caredata$footnote)#there are 296 without reports and 936 with reports.
+summary(final_caredata$score)
+```
+
+when we did the log transformation, it did not improve the model fit so we maintained the score variable the way it was.
+
+Research Question:
+
+“Can we accurately predict a healthcare performance score using the type of condition, and footnote data completeness?”
+
+Possible Predictors:
+condition (categorical – one-hot encoded or label encoded)
+
+footnote (binary: 0 or 1)
+
+measure_id or measure_name (optional: but could be useful as features if encoded)
+
+state (optional: can include as a random effect or feature)
+
+📊 Outcome:
+score (continuous → regression problem)
+
+
+Hypothesis:
+“Healthcare performance scores differ systematically by type of healthcare measure (e.g., vaccination vs emergency care), and scores tend to be lower when reports are incomplete.”
+
+Since the measure id has many different unique variables,we decided to filter it to only include emergency and vaccination.
+```{r}
+
+# Filter the data
+final_caredata <- final_caredata %>%
+  filter(measure_id %in% c("HCP_COVID_19", "IMM_3"))
+```
+
+We decided to predict the score of the percentage of health workers who are upto date with their covid 19 vaccine and also  the score of health care workers given influenza vaccine.
+
+We decided to proceed with the analysis and hence dropped variables that will not be used during our annalysis .
+```{r}
+#keep only these variable.names
+final_data<-final_caredata%>%
+  select(-measure_name, -footnote)
+
+```
+
+From this data, this is the question we were able to formulate
+
+
+"Does the rate of influenza vaccination (IMM_3) among healthcare personnel predict the rate of COVID-19 vaccination (HCP_COVID_19) among the same population?"
+
+The Hypothesis:
+
+We hypothesized that there is a positive relationship between influenza vaccination rates (IMM_3) and COVID-19 vaccination rates (HCP_COVID_19) among healthcare personnel.
+
+```{r}
+#pivot wider 
+library(tidyverse)
+library(tidymodels)
+
+df_wide <- final_data %>%
+  select(state, measure_id, score) %>%
+  pivot_wider(names_from = measure_id, values_from = score) %>%
+  drop_na()
+
+```
+
+Lets proceed and split the data.
+```{r}
+set.seed(1234)
+split <- initial_split(df_wide, prop = 0.8)
+train_data <- training(split)
+test_data <- testing(split)
+
+```
+Lets proceed and fit three models on this data and see which one will perform best.
+
+```{r}
+
+# Recipe
+recipe_rf <- recipe(HCP_COVID_19 ~ IMM_3, data = train_data)
+#linear regression model
+
+lm_model <- linear_reg() %>%
+  set_engine("lm")
+
+lm_workflow <- workflow() %>%
+  add_model(lm_model) %>%
+  add_formula(HCP_COVID_19 ~ IMM_3)
+
+lm_fit <- lm_workflow %>% fit(data = train_data)
+
+#random forest
+rf_model <- rand_forest(trees = 500) %>%
+  set_engine("ranger") %>%
+  set_mode("regression")
+
+rf_workflow <- workflow() %>%
+  add_model(rf_model) %>%
+  add_recipe(recipe_rf)
+
+rf_fit <- rf_workflow %>% fit(data = train_data)
+
+# XGBoost Model Spec
+xgb_spec <- boost_tree() %>%
+  set_engine("xgboost") %>%
+  set_mode("regression")
+
+xgb_workflow <- workflow() %>%
+  add_model(xgb_spec) %>%
+  add_recipe(recipe_rf)
+xgb_fit <- xgb_workflow %>% fit(data = train_data)
+```
+
+
+lets make some predictions on the dat
+```{r}
+library(yardstick)
+library(dplyr)
+
+# Linear Regression Predictions
+lm_preds <- predict(lm_fit, new_data = test_data) %>%
+  bind_cols(test_data %>% select(HCP_COVID_19)) %>%
+  mutate(model = "Linear Regression")
+
+# Random Forest Predictions
+rf_preds <- predict(rf_fit, new_data = test_data) %>%
+  bind_cols(test_data %>% select(HCP_COVID_19)) %>%
+  mutate(model = "Random Forest")
+
+# XGBoost Predictions
+xgb_preds <- predict(xgb_fit, new_data = test_data) %>%
+  bind_cols(test_data %>% select(HCP_COVID_19)) %>%
+  mutate(model = "XGBoost")
+
+
+```
+
+lets gather some metrics and see which models will perform best.
+```{r}
+# Combine all
+all_preds <- bind_rows(lm_preds, rf_preds, xgb_preds)
+
+# Evaluate
+all_metrics <- all_preds %>%
+  group_by(model) %>%
+  metrics(truth = HCP_COVID_19, estimate = .pred)
+
+print(all_metrics)
+
+```
+From the above, we see that the Random forests model is performing better at predicting results followed by the XGboost model. The linear regression model is performing worse in terms of the R squared but we shall choose it for easy interpretation of results.
+
+The random forest would be the best for predicting because, 
+It has the lowest RMSE (17.01) and lowest MAE (10.97) which means that it predicts more accurately.
+
+It also has the highest R² (0.82) hence it explains 82% of the variation in COVID-19 vaccination rates (HCP_COVID_19) using flu vaccination rates (IMM_3).
+
+While XGBoost also performs well, Random Forest edges it out on all metrics, and it's a bit more interpretable.
+
+```{r}
+# Residuals
+rf_preds <- rf_preds %>%
+  mutate(residual = HCP_COVID_19 - .pred)
+
+# Plot residuals
+library(ggplot2)
+ggplot(rf_preds, aes(x = .pred, y = residual)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Residual Plot - Random Forest",
+       x = "Predicted HCP_COVID_19",
+       y = "Residuals")
+
+```
+When we fitted the residual plot, it showed that the random forests model was regressing the vaccination rates towards the mean. This was partly maybe to the fact that the prediction values were low. since it had a good R-squared, it was still a very good candidate for prediction.
+
+We went ahead and fitted the predicted vs the actual plot.
+
+```{r}
+library(ggplot2)
+library(tibble)
+
+# Generate predictions from the fitted model
+rf_preds <- predict(rf_fit, new_data = test_data) %>%
+  bind_cols(test_data %>% select(HCP_COVID_19))
+
+# Plot predicted vs actual
+ggplot(rf_preds, aes(x = .pred, y = HCP_COVID_19)) +
+  geom_point(color = "blue", size = 2) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    title = "Predicted vs Actual - Random Forest",
+    x = "Predicted HCP_COVID_19",
+    y = "Actual HCP_COVID_19"
+  ) +
+  theme_minimal()
+
+```
+The predicted vs. actual plot shows that the Random Forest model provides strong predictions for the majority of healthcare facilities, especially those with lower HCP COVID-19 vaccination rates. Though there are a few outliers, these could be dues to the fact that i used a few predictors in the model and adding in more predictors could pontentially improve its performance.
+
+
+we explored the linear models to see how it will work
+```{r}
+tidy(lm_fit)
+
+```
+
+
+#Discussion
+This study was meant to to help find out whether the rate of influenza vaccination rates can help us predict the covid 19 vaccination rates among health care personnel. From our findings, there was a strong positive predictive relationship. The Random Forest model performed best with R² of 0.82, indicating strong predictive power than all the other models
+
+This supports the idea that states  with high flu vaccine uptake among healthcare workers also tend to have high COVID-19 vaccine uptake. Results from the linear model indicated that for every  1% increase in IMM_3, we  would expect a  1.68% increase in HCP_COVID_19, on average.This suggests a positive association between the two vaccination behaviors in healthcare settings.
+
+#conclusion
+The analysis shows that influenza vaccination rates are a strong predictor of COVID-19 vaccination rates among healthcare personnel. The Random Forest model showed this relationship most effectively, with its high accuracy and low error when we used it on unseen test data. Our findings suggest that encouraging flu vaccinations may correlate with improved uptake of other vaccines in healthcare settings.
+
+From this study,we can see that predictive models can be valuable tools to use in identifying trends and hence can help in targeting intervations.
